@@ -3,9 +3,8 @@ import { Article } from 'src/articles/entities/article.entity';
 import { User } from 'src/users/entities/user.entity';
 import { BaseEntity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Entity } from 'typeorm/decorator/entity/Entity';
-import { IsNull } from 'typeorm/find-options/operator/IsNull';
 
-@Entity()
+@Entity('comments')
 export class Comment extends BaseEntity {
   @ApiProperty()
   @PrimaryGeneratedColumn({ type: 'int' })
@@ -24,12 +23,12 @@ export class Comment extends BaseEntity {
   updated_at: Date;
 
   @ApiProperty()
-  @Column({ type: 'timestamptz', default: null , nullable : true})
+  @Column({ type: 'timestamptz', default: null, nullable: true })
   deleted_at: Date;
 
   @ManyToOne(() => User, (user) => user.comments)
-  user : User ;
+  user: User;
 
   @ManyToOne(() => Article, (article) => article.comments)
-  article : Article ;
+  article: Article;
 }

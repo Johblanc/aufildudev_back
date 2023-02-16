@@ -9,17 +9,15 @@ import {
   ManyToOne,
 } from 'typeorm';
 
-
-@Entity("requierments")
+@Entity('requirements')
 export class Requierment extends BaseEntity {
-    @ApiProperty()
-    @PrimaryGeneratedColumn({ type: 'int' })
-    id: number;
+  @ApiProperty()
+  @PrimaryGeneratedColumn({ type: 'int' })
+  id: number;
 
-    @ManyToOne(() => Article, (article) => article.requirements)
-    article : Article
+  @ManyToOne(() => Article, (article) => article.requirements)
+  article: Article;
 
-    @ManyToOne(() => Article, (article) => article.needed_for)
-    article_needed : Article
-
+  @ManyToOne(() => Article, (article) => article.needed_for)
+  article_needed: Article;
 }

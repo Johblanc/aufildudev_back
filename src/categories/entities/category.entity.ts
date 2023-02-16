@@ -10,7 +10,7 @@ import {
   JoinTable,
 } from 'typeorm';
 
-@Entity()
+@Entity('categories')
 @Unique(['name'])
 export class Category extends BaseEntity {
   @ApiProperty()

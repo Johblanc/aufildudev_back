@@ -10,7 +10,7 @@ import {
   JoinTable,
 } from 'typeorm';
 
-@Entity()
+@Entity('frameworks')
 @Unique(['name'])
 export class Framework extends BaseEntity {
   @ApiProperty()

@@ -34,18 +34,18 @@ import { Requierment } from './requierments/entities/requierment.entity';
         Language,
         Category,
         Framework,
-        Requierment
+        Requierment,
       ],
       synchronize: true,
     }),
     ArticlesModule,
-    CommentsModule, 
-    UsersModule, 
-    LanguagesModule, 
-    CategoriesModule, 
-    FrameworksModule
+    CommentsModule,
+    UsersModule,
+    LanguagesModule,
+    CategoriesModule,
+    FrameworksModule,
   ],
-  controllers: [AppController], 
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
