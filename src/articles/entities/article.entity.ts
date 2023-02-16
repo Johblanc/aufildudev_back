@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Entity } from "typeorm";
-import { Column } from "typeorm/decorator/columns/Column";
-import { PrimaryGeneratedColumn } from "typeorm/decorator/columns/PrimaryGeneratedColumn";
+import { Comment } from "src/comments/entities/comment.entity";
+import { Requierment } from "src/requierments/entities/requierment.entity";
+import { User } from "src/users/entities/user.entity";
+import { Entity,Column,PrimaryGeneratedColumn,ManyToOne,OneToMany} from "typeorm";
 import { Unique } from "typeorm/decorator/Unique";
 import { BaseEntity } from "typeorm/repository/BaseEntity";
 
@@ -12,10 +13,11 @@ export class Article extends BaseEntity {
 
     @ApiProperty()
     @PrimaryGeneratedColumn()
+    @OneToMany(() => Article, (article) => article.requirements)
     id : number ;
 
     @ApiProperty()
-    @Column({type : "varchar"}) 
+    @Column({type : "varchar", name : "title"}) 
     title : string ;
 
     @ApiProperty() 
@@ -31,11 +33,24 @@ export class Article extends BaseEntity {
     created_at : Date ;
 
     @ApiProperty()
-    @Column({type : "timestamptz", default : new Date()})
+    @Column({type : "timestamptz", default : null, nullable : true})
     update_at : Date ;
 
     @ApiProperty()
-    @Column({type : "timestamptz", default : null})
+    @Column({type : "timestamptz", default : null, nullable : true})
     deleted_at : Date ;
 
+
+    @ManyToOne(() => Comment, (comment) => comment.article)
+    comments : Comment ;
+
+
+    @OneToMany(() => User, (user) => user.articles)
+    user : User ;
+
+    @ManyToOne(() => Requierment, (requierment) => requierment.article)
+    requirements : Requierment[] ;
+
+    @ManyToOne(() => Requierment, (requierment) => requierment.article_needed)
+    needed_for : Requierment[] ;
 }

@@ -15,6 +15,7 @@ import { Language } from './languages/entities/language.entity';
 import { Category } from './categories/entities/category.entity';
 import { Framework } from './frameworks/entities/framework.entity';
 import { Comment } from './comments/entities/comment.entity';
+import { Requierment } from './requierments/entities/requierment.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { Comment } from './comments/entities/comment.entity';
         User,
         Language,
         Category,
-        Framework
+        Framework,
+        Requierment
       ],
       synchronize: true,
     }),

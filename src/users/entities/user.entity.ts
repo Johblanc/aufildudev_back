@@ -1,10 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Article } from 'src/articles/entities/article.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 import {
   BaseEntity,
   Column,
   Entity,
   PrimaryGeneratedColumn,
   Unique,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -29,4 +32,10 @@ export class User extends BaseEntity {
   @ApiProperty()
   @Column({ type: 'int', default: 1 })
   access_lvl: number;
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments : Comment[] ;
+
+  @OneToMany(() => Article, (article) => article.user)
+  articles : Article[] ;
 }
