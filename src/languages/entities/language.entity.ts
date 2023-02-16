@@ -7,7 +7,7 @@ import {
   Unique,
 } from 'typeorm';
 
-@Entity()
+@Entity('languages')
 @Unique(['name'])
 export class Language extends BaseEntity {
   @ApiProperty()

@@ -7,6 +7,5 @@ export class CreateCommentDto {
   content: string;
 
   @IsNumber()
-  @Length(1)
   article_id: Article;
 }

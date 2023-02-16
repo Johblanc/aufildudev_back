@@ -15,7 +15,7 @@ export class CommentsService {
 
     await comment.save();
 
-    return comment;
+    return comment.article.title;
   }
 
   findAll() {

@@ -10,7 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 
-@Entity()
+@Entity('users')
 @Unique(['pseudo', 'email'])
 export class User extends BaseEntity {
   @ApiProperty()
@@ -34,8 +34,8 @@ export class User extends BaseEntity {
   access_lvl: number;
 
   @OneToMany(() => Comment, (comment) => comment.user)
-  comments : Comment[] ;
+  comments: Comment[];
 
   @OneToMany(() => Article, (article) => article.user)
-  articles : Article[] ;
+  articles: Article[];
 }
