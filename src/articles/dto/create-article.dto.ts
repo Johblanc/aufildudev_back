@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger/dist";
-import { IsString } from "class-validator";
+import { IsString ,IsArray,IsOptional} from "class-validator";
 
 export class CreateArticleDto {
 
@@ -10,4 +10,9 @@ export class CreateArticleDto {
     @ApiProperty()
     @IsString()
     content : string ;
+
+    @ApiProperty()
+    @IsArray()
+    @IsOptional()
+    requirements : number[] ;
 }

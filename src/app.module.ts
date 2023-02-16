@@ -15,6 +15,7 @@ import { Language } from './languages/entities/language.entity';
 import { Category } from './categories/entities/category.entity';
 import { Framework } from './frameworks/entities/framework.entity';
 import { Comment } from './comments/entities/comment.entity';
+import { Requierment } from './requierments/entities/requierment.entity';
 
 @Module({
   imports: [
@@ -26,7 +27,15 @@ import { Comment } from './comments/entities/comment.entity';
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [Article, Comment, User, Language, Category, Framework],
+      entities: [
+        Article,
+        Comment,
+        User,
+        Language,
+        Category,
+        Framework,
+        Requierment,
+      ],
       synchronize: true,
     }),
     ArticlesModule,
