@@ -50,9 +50,9 @@ export class Article extends BaseEntity {
   @OneToMany(() => User, (user) => user.articles)
   user: User;
 
-  @ManyToOne(() => Requierment, (requierment) => requierment.article)
+  @OneToMany(() => Requierment, (requierment) => requierment.article)
   requirements: Requierment[];
 
-  @ManyToOne(() => Requierment, (requierment) => requierment.article_needed)
+  @OneToMany(() => Requierment, (requierment) => requierment.article_needed)
   needed_for: Requierment[];
 }
