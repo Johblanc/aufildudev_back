@@ -14,6 +14,7 @@ import { User } from './users/entities/user.entity';
 import { Language } from './languages/entities/language.entity';
 import { Category } from './categories/entities/category.entity';
 import { Framework } from './frameworks/entities/framework.entity';
+import { Comment } from './comments/entities/comment.entity';
 
 @Module({
   imports: [

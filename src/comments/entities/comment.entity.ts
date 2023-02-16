@@ -18,10 +18,10 @@ export class Comment extends BaseEntity {
   created_at: Date;
 
   @ApiProperty()
-  @Column({ type: 'timestamptz', default: IsNull() })
+  @Column({ type: 'timestamptz', default: null })
   updated_at: Date;
 
   @ApiProperty()
-  @Column({ type: 'timestamptz', default: IsNull() })
+  @Column({ type: 'timestamptz', default: null })
   deleted_at: Date;
 }
