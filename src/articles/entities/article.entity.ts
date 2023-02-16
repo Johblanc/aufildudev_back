@@ -41,16 +41,16 @@ export class Article extends BaseEntity {
     deleted_at : Date ;
 
 
-    @ManyToOne(() => Comment, (comment) => comment.article)
+    @OneToMany(() => Comment, (comment) => comment.article)
     comments : Comment ;
 
 
-    @OneToMany(() => User, (user) => user.articles)
+    @ManyToOne(() => User, (user) => user.articles)
     user : User ;
 
-    @ManyToOne(() => Requierment, (requierment) => requierment.article)
+    @OneToMany(() => Requierment, (requierment) => requierment.article)
     requirements : Requierment[] ;
 
-    @ManyToOne(() => Requierment, (requierment) => requierment.article_needed)
+    @OneToMany(() => Requierment, (requierment) => requierment.article_needed)
     needed_for : Requierment[] ;
 }

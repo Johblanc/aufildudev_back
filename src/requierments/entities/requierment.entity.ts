@@ -6,7 +6,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Unique,
-  OneToMany,
+  ManyToOne,
 } from 'typeorm';
 
 
@@ -16,10 +16,10 @@ export class Requierment extends BaseEntity {
     @PrimaryGeneratedColumn({ type: 'int' })
     id: number;
 
-    @OneToMany(() => Article, (article) => article.requirements)
+    @ManyToOne(() => Article, (article) => article.requirements)
     article : Article
 
-    @OneToMany(() => Article, (article) => article.needed_for)
+    @ManyToOne(() => Article, (article) => article.needed_for)
     article_needed : Article
 
 }
