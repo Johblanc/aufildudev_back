@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Article } from 'src/articles/entities/article.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from './entities/comment.entity';
@@ -12,10 +13,14 @@ export class CommentsService {
     const comment = new Comment();
     comment.content = createCommentDto.content;
     comment.article = createCommentDto.article_id;
-
     await comment.save();
 
-    return comment.article.title;
+    const article = await Article.findOneBy({
+      id: comment.article,
+      deleted_at: null,
+    });
+
+    return comment.article;
   }
 
   findAll() {
