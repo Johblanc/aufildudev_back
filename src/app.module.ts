@@ -26,24 +26,17 @@ import { Comment } from './comments/entities/comment.entity';
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [
-        Article,
-        Comment,
-        User,
-        Language,
-        Category,
-        Framework
-      ],
+      entities: [Article, Comment, User, Language, Category, Framework],
       synchronize: true,
     }),
     ArticlesModule,
-    CommentsModule, 
-    UsersModule, 
-    LanguagesModule, 
-    CategoriesModule, 
-    FrameworksModule
+    CommentsModule,
+    UsersModule,
+    LanguagesModule,
+    CategoriesModule,
+    FrameworksModule,
   ],
-  controllers: [AppController], 
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
