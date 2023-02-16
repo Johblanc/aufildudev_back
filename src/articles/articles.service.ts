@@ -7,31 +7,37 @@ import { Requierment } from 'src/requierments/entities/requierment.entity';
 
 @Injectable()
 export class ArticlesService {
-  async create(createArticleDto: CreateArticleDto) {
+  async create(userId : number , title : string, content : string, requirements : number[] ) {
     const article =  new Article()
-    article.title = createArticleDto.title ;
-    article.content = createArticleDto.content ;
+    article.title = title ;
+    article.content = content ;
     await article.save()
-    const requierments = await Article.findBy({id : In(createArticleDto.requirements)})
+    
+    const requierments = await Article.findBy({id : In(requirements)})
     requierments.forEach(async item => {
       await Requierment.create({article : article, article_needed : item}).save()
     })
-    return await article.save();
+    
+    return await this.findOne(article.id); 
   }
 
   async findAll() {
     return await Article.findBy({ deleted_at : IsNull() });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} article`;
+  async findOne(id: number) { 
+    return await Article.findOneBy({id : id});
   }
 
-  update(id: number, updateArticleDto: UpdateArticleDto) {
+  async findOneByName(title: string) {
+    return await Article.findOneBy({title : title});
+  }
+
+  async update(id: number, updateArticleDto: UpdateArticleDto) {
     return `This action updates a #${id} article`;
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     return `This action removes a #${id} article`;
   }
 }
