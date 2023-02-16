@@ -1,8 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Category } from "src/categories/entities/category.entity";
 import { Comment } from "src/comments/entities/comment.entity";
+import { Framework } from "src/frameworks/entities/framework.entity";
+import { Language } from "src/languages/entities/language.entity";
 import { Requierment } from "src/requierments/entities/requierment.entity";
 import { User } from "src/users/entities/user.entity";
-import { Entity,Column,PrimaryGeneratedColumn,ManyToOne,OneToMany} from "typeorm";
+import { Entity,Column,PrimaryGeneratedColumn,ManyToOne,OneToMany,ManyToMany,JoinTable} from "typeorm";
 import { Unique } from "typeorm/decorator/Unique";
 import { BaseEntity } from "typeorm/repository/BaseEntity";
 
@@ -53,4 +56,16 @@ export class Article extends BaseEntity {
 
     @OneToMany(() => Requierment, (requierment) => requierment.article_needed)
     needed_for : Requierment[] ;
+
+    @ManyToMany(() => Language, (competence) => competence.articles)
+    @JoinTable()
+    languages: Language[];
+
+    @ManyToMany(() => Category, (category) => category.articles)
+    @JoinTable()
+    categories: Category[];
+
+    @ManyToMany(() => Framework, (framework) => framework.articles)
+    @JoinTable()
+    frameworks: Framework[];
 }

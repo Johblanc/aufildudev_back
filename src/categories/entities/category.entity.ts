@@ -1,10 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Article } from 'src/articles/entities/article.entity';
 import {
   BaseEntity,
   Column,
   Entity,
   PrimaryGeneratedColumn,
   Unique,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity()
@@ -17,4 +20,8 @@ export class Category extends BaseEntity {
   @ApiProperty()
   @Column({ name: 'name', type: 'varchar' })
   name: string;
+
+  @ManyToMany(() => Article, (article) => article.categories)
+  @JoinTable()
+  articles: Article[];
 }
