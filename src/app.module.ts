@@ -2,6 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CommentsModule } from './comments/comments.module';
+import { UsersModule } from './users/users.module';
+import { LanguagesModule } from './languages/languages.module';
+import { CategoriesModule } from './categories/categories.module';
+import { FrameworksModule } from './frameworks/frameworks.module';
 import { ArticlesModule } from './articles/articles.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Article } from './articles/entities/article.entity';
@@ -22,7 +27,7 @@ import { Article } from './articles/entities/article.entity';
       synchronize: true,
     }),
     ArticlesModule
-  ],
+  CommentsModule, UsersModule, LanguagesModule, CategoriesModule, FrameworksModule],
   controllers: [AppController], 
   providers: [AppService],
 })
