@@ -57,6 +57,7 @@ export class CommentsService {
       relations: { article: true },
       select: { id: true, content: true, article: { id: true, title: true } },
       where: { article: { id: id, deleted_at: IsNull() } },
+      order: { created_at: 'DESC' },
     });
   }
   //Récupération de l'id user via token à add
