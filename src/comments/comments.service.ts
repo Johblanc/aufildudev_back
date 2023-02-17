@@ -35,12 +35,23 @@ export class CommentsService {
     return null;
   }
 
-  findAll() {
-    return `This action returns all comments`;
-  }
+  async findAll(): Promise<Comment[] | null> {
+    const allComments = await Comment.find({
+      relations: { article: true },
+      select: { id: true, content: true, article: { id: true, title: true } },
+      where: { deleted_at: IsNull() },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
+    return allComments;
+  }
+  //Récupération de l'id user via token à add
+  async findOne(id: number): Promise<Comment | null> {
+    console.log('Récupération de lid user via token à add');
+    return await Comment.findOne({
+      relations: { article: true },
+      select: { id: true, content: true, article: { id: true, title: true } },
+      where: { id: id },
+    });
   }
 
   update(id: number, updateCommentDto: UpdateCommentDto) {
