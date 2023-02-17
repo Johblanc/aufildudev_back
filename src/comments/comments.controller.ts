@@ -10,7 +10,7 @@ import {
   Bind,
 } from '@nestjs/common';
 import { ParseIntPipe } from '@nestjs/common/pipes';
-import { ApiBody, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ArticlesService } from 'src/articles/articles.service';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
