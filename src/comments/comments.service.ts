@@ -23,10 +23,11 @@ export class CommentsService {
       await comment.save();
 
       return await Comment.findOne({
+        relations: { article: true },
         select: {
-          id: comment.id,
-          content: comment.content,
-          article: { id: article.id, title: article.title },
+          id: true,
+          content: true,
+          article: { id: true, title: true },
         },
         where: { id: comment.id },
       });
