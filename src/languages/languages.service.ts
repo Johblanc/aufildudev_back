@@ -1,26 +1,58 @@
 import { Injectable } from '@nestjs/common';
+import { ArrayContains } from 'typeorm';
 import { CreateLanguageDto } from './dto/create-language.dto';
 import { UpdateLanguageDto } from './dto/update-language.dto';
+import { Language } from './entities/language.entity';
 
 @Injectable()
 export class LanguagesService {
-  create(createLanguageDto: CreateLanguageDto) {
-    return 'This action adds a new language';
+  async createLanguage(createLanguageDto: CreateLanguageDto) {
+    const newLanguage = Language.create({
+      name: createLanguageDto.name
+    });
+    const language = await Language.save(newLanguage);
+    return language
+  };
+
+
+
+  async findAllLanguages() {
+    const languages = await Language.find();
+    return languages
   }
 
-  findAll() {
-    return `This action returns all languages`;
+
+  async findOneLanguage(languageId: number) {
+    const language = await Language.findOneBy({ id: languageId });
+    return language
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} language`;
+
+  async findManyLanguage(languageId: number[]) {
+    const languages = await Language.findBy({
+      id: ArrayContains([languageId])
+    })
+    return languages
   }
 
-  update(id: number, updateLanguageDto: UpdateLanguageDto) {
-    return `This action updates a #${id} language`;
+
+  async updateLanguage(languageId: number, updateLanguageDto: UpdateLanguageDto): Promise<Language | null> {
+    const language = await Language.findOneBy({ id: languageId });
+    if (language !== null) {
+      if (updateLanguageDto.name)
+        language.name = updateLanguageDto.name;
+      await language.save()
+    }
+    return language
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} language`;
+
+  async removeLanguage(languageId: number): Promise<Language | null> {
+    const language = await Language.findOneBy({ id: languageId });
+    if (language !== null) {
+      await language.remove()
+
+    }
+    return language;
   }
 }
