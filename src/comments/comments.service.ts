@@ -35,19 +35,79 @@ export class CommentsService {
     return null;
   }
 
-  findAll() {
-    return `This action returns all comments`;
+  async findAll(): Promise<Comment[] | null> {
+    return await Comment.find({
+      relations: { article: true },
+      select: { id: true, content: true, article: { id: true, title: true } },
+      where: { deleted_at: IsNull() },
+    });
+  }
+  //Récupération de l'id user via token à add
+  async findOne(id: number): Promise<Comment | null> {
+    console.log('Récupération de lid user via token à add');
+    return await Comment.findOne({
+      relations: { article: true },
+      select: { id: true, content: true, article: { id: true, title: true } },
+      where: { id: id, deleted_at: IsNull() },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
+  async getArticleById(id: number): Promise<Comment[] | null> {
+    return await Comment.find({
+      relations: { article: true },
+      select: { id: true, content: true, article: { id: true, title: true } },
+      where: { article: { id: id, deleted_at: IsNull() } },
+    });
   }
+  //Récupération de l'id user via token à add
+  async update(
+    id: number,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<Comment | null> {
+    console.log('Récupération de lid user via token à add');
+    const newComment = await Comment.findOne({
+      where: { id: id, deleted_at: IsNull() },
+    });
+    if (newComment !== null) {
+      newComment.content = updateCommentDto.content;
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
+      await newComment.save();
+
+      return await Comment.findOne({
+        relations: { article: true },
+        select: {
+          id: true,
+          content: true,
+          article: { id: true, title: true },
+          updated_at: true,
+        },
+        where: { id: id },
+      });
+    }
+    return null;
   }
+  //Récupération de l'id user via token à add
+  async remove(id: number): Promise<Comment | null> {
+    console.log('Récupération de lid user via token à add');
+    const deleteComment = await Comment.findOne({
+      where: { id: id, deleted_at: IsNull() },
+    });
+    if (deleteComment !== null) {
+      deleteComment.deleted_at = new Date();
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+      await deleteComment.save();
+
+      return await Comment.findOne({
+        relations: { article: true },
+        select: {
+          id: true,
+          content: true,
+          article: { id: true, title: true },
+          deleted_at: true,
+        },
+        where: { id: id },
+      });
+    }
+    return null;
   }
 }

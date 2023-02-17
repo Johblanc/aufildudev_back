@@ -1,7 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger/dist';
 import { Article } from 'src/articles/entities/article.entity';
 import { User } from 'src/users/entities/user.entity';
-import { BaseEntity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Entity } from 'typeorm/decorator/entity/Entity';
 
 @Entity('comments')
@@ -15,11 +22,11 @@ export class Comment extends BaseEntity {
   content: string;
 
   @ApiProperty()
-  @Column({ type: 'timestamptz', default: new Date() })
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
 
   @ApiProperty()
-  @Column({ type: 'timestamptz', default: null })
+  @UpdateDateColumn({ type: 'timestamptz', default: null })
   updated_at: Date;
 
   @ApiProperty()
