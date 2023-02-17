@@ -9,7 +9,8 @@ export class LanguagesController {
 
   @Post()
   create(@Body() createLanguageDto: CreateLanguageDto) {
-    return this.languagesService.create(createLanguageDto);
+    //verifier que name nexiste pas deja
+    return this.languagesService.create(createLanguageDto); //return {message:"new Language", data:language}
   }
 
   @Get()
@@ -24,6 +25,7 @@ export class LanguagesController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateLanguageDto: UpdateLanguageDto) {
+    //verifier que le NOUVEAU name nexiste pas deja
     return this.languagesService.update(+id, updateLanguageDto);
   }
 
