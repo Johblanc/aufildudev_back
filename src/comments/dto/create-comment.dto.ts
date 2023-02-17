@@ -1,5 +1,4 @@
 import { IsNumber, IsString, Length } from 'class-validator';
-import { Article } from 'src/articles/entities/article.entity';
 
 export class CreateCommentDto {
   @IsString()

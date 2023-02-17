@@ -33,11 +33,19 @@ export class CommentsController {
     return this.commentsService.findOne(+id);
   }
 
+  @ApiProperty()
+  @Get('article/:id')
+  find(@Param('id') id: string) {
+    return this.commentsService.getArticleById(+id);
+  }
+
+  @ApiProperty()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
     return this.commentsService.update(+id, updateCommentDto);
   }
 
+  @ApiProperty()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.commentsService.remove(+id);
