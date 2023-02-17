@@ -45,7 +45,7 @@ export class Article extends BaseEntity {
     @ManyToOne(() => Comment, (comment) => comment.article)
     comments: Comment;
 
-    @OneToMany(() => User, (user) => user.articles)
+    @ManyToOne(() => User, (user) => user.articles)
     user: User;
 
     @OneToMany(() => Requierment, (requierment) => requierment.article)
@@ -65,4 +65,20 @@ export class Article extends BaseEntity {
     @ManyToMany(() => Framework, (framework) => framework.articles)
     @JoinTable()
     frameworks: Framework[];
+
+    asObject(){
+        return {
+            id : this.id,
+            title : this.title,
+            content : this.comments,
+            is_public : this.is_public,
+            user_pseudo : this.user.pseudo,
+            created_at : this.created_at,
+            requirements : this.requirements.map(item => item.asRequirement()),
+            needed_for : this.needed_for.map(item => item.asNeeded_for()),
+            languages : this.languages,
+            categories : this.categories,
+            frameworks : this.frameworks
+        }
+    }
 }

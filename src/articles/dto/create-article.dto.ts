@@ -15,4 +15,17 @@ export class CreateArticleDto {
     @IsArray()
     @IsOptional()
     requirements : number[] ;
+
+    @ApiProperty()
+    @IsArray()
+    languages : number[] ;
+
+    @ApiProperty()
+    @IsArray()
+    categories : number[] ;
+
+    @ApiProperty()
+    @IsArray()
+    @IsOptional()
+    frameworks : number[] ;
 }
