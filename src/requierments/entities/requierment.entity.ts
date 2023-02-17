@@ -20,4 +20,17 @@ export class Requierment extends BaseEntity {
 
   @ManyToOne(() => Article, (article) => article.needed_for)
   article_needed: Article;
+
+  asRequirement(){
+    return {
+      id : this.article_needed.id ,
+      title : this.article_needed.title ,
+    }
+  }
+  asNeeded_for(){
+    return {
+      id : this.article.id ,
+      title : this.article.title ,
+    }
+  }
 }
