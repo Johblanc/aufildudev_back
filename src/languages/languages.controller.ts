@@ -1,19 +1,49 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete} from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common/exceptions';
 import { LanguagesService } from './languages.service';
 import { CreateLanguageDto } from './dto/create-language.dto';
 import { UpdateLanguageDto } from './dto/update-language.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { Language } from './entities/language.entity';
+import { In } from 'typeorm';
 
+
+
+@ApiTags('languages')
 @Controller('languages')
 export class LanguagesController {
-  constructor(private readonly languagesService: LanguagesService) {}
+  constructor(private readonly languagesService: LanguagesService) { }
 
   @Post()
-  create(@Body() createLanguageDto: CreateLanguageDto) {
-    //verifier que name nexiste pas deja
-    return this.languagesService.create(createLanguageDto); //return {message:"new Language", data:language}
+  async create(@Body() createLanguageDto: CreateLanguageDto) {
+    const verificationName = await Language.findOneBy({
+      name: In([])
+    });
+    if (verificationName) {
+      throw new ConflictException('Language deja existant')
+    };
+
+    const newLanguage = await this.languagesService.createLanguage(
+      createLanguageDto
+    );
+
+    if (newLanguage===null){
+    console.log(createLanguageDto);
+        throw new BadRequestException("Nom du langugage manquant");
+    }
+      
+    else {
+      return {
+        message: 'nouveau language ajoute',
+        data: newLanguage
+      }
+    }
   }
 
-  @Get()
+
+
+
+  /* @Get()
   findAll() {
     return this.languagesService.findAll();
   }
@@ -32,5 +62,5 @@ export class LanguagesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.languagesService.remove(+id);
-  }
+  } */
 }
