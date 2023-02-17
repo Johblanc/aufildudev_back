@@ -1,8 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { IsDate, IsString, Length } from 'class-validator';
-import { CreateCommentDto } from './create-comment.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, Length } from 'class-validator';
 
-export class UpdateCommentDto extends PartialType(CreateCommentDto) {
+export class UpdateCommentDto {
+  @ApiProperty()
   @IsString()
   @Length(1, 8000)
   content: string;

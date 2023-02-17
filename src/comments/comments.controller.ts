@@ -6,48 +6,137 @@ import {
   Patch,
   Param,
   Delete,
+  NotFoundException,
+  Bind,
 } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ParseIntPipe } from '@nestjs/common/pipes';
+import { ApiBody, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ArticlesService } from 'src/articles/articles.service';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
+@ApiTags('comments')
 @Controller('comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly articlesService: ArticlesService,
+  ) {}
+  /** Création d'un commentaire
+   *
+   * @param createCommentDto Reçois le Body en param via le dto
+   * @return en data son id, son contenu ainsi que l'id et le titre de l'article associé
+   */
   //Récupération de l'id user via token à add
-  @ApiProperty()
+  @ApiResponse({ status: 201, description: 'Commentaire posté' })
   @Post()
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentsService.create(createCommentDto);
+  async create(@Body() createCommentDto: CreateCommentDto) {
+    return {
+      message: `Commentaire posté`,
+      data: await this.commentsService.create(createCommentDto),
+    };
   }
-  @ApiProperty()
+
+  /** Récupération de tous les commentaires
+   *
+   * @return en data son id, son contenu ainsi que l'id et le titre de l'article associé
+   */
+  @ApiResponse({
+    status: 200,
+    description: 'Voici la liste de tous les commentaires',
+  })
   @Get()
-  findAll() {
-    return this.commentsService.findAll();
+  async findAll() {
+    return {
+      message: 'Voici la liste de tous les commentaires',
+      data: await this.commentsService.findAll(),
+    };
   }
+
+  /** Récupération d'un commentaire
+   *
+   * @param createCommentDto Reçois le Body en param via le dto
+   * @return en data son id, son contenu ainsi que l'id et le titre de l'article associé
+   */
   //Récupération de l'id user via token à add
-  @ApiProperty()
+  @ApiResponse({
+    status: 200,
+    description: 'Voici le commentaire n°${id}',
+  })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentsService.findOne(+id);
+  @Bind(Param('id', new ParseIntPipe()))
+  async findOne(@Param('id') id: string) {
+    const comment = await this.commentsService.findOne(+id);
+    if (comment === null) throw new NotFoundException();
+    return {
+      message: `Voici le commentaire n°${id}`,
+      data: comment,
+    };
   }
 
-  @ApiProperty()
+  /** Récupération de tous les commentaires lié à un article
+   *
+   * @param createCommentDto Reçois le Body en param via le dto
+   * @return en data son id, son contenu ainsi que l'id et le titre de l'article associé
+   */
+  @ApiResponse({
+    status: 200,
+    description: "Voici tout les commentaire de l'article ${id}.",
+  })
   @Get('article/:id')
-  find(@Param('id') id: string) {
-    return this.commentsService.getArticleById(+id);
+  @Bind(Param('id', new ParseIntPipe()))
+  async find(@Param('id') id: string) {
+    const isExist = await this.articlesService.findOne(+id);
+    if (!isExist) throw new NotFoundException();
+    return {
+      message: `Voici tout les commentaire de l'article ${id}.`,
+      data: await this.commentsService.getArticleById(+id),
+    };
   }
 
-  @ApiProperty()
+  /** Modification du contenu d'un commentaire
+   *
+   * @param createCommentDto Reçois le Body en param via le dto
+   * @return en data son id, son contenu, l'heure et date de modification ainsi que l'id et le titre de l'article associé
+   */
+  @ApiResponse({
+    status: 201,
+    description: 'Vous avez modifié le commentaire n°${id}',
+  })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentsService.update(+id, updateCommentDto);
+  @Bind(Param('id', new ParseIntPipe()))
+  async update(
+    @Param('id') id: string,
+    @Body() updateCommentDto: UpdateCommentDto,
+  ) {
+    const commentUpdated = await this.commentsService.update(
+      +id,
+      updateCommentDto,
+    );
+    if (commentUpdated === null) throw new NotFoundException();
+    return {
+      message: `Vous avez modifié le commentaire n°${id}`,
+      data: commentUpdated,
+    };
   }
 
-  @ApiProperty()
+  /** Suppression d'un commentaire
+   *
+   * @return en data son id, son contenu, heure et date de la suppression, ainsi que l'id et le titre de l'article associé
+   */
+  @ApiResponse({
+    status: 201,
+    description: 'Commentaire n°${id} supprimé',
+  })
+  @Bind(Param('id', new ParseIntPipe()))
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const commentDeleted = await this.commentsService.remove(+id);
+    if (commentDeleted === null) throw new NotFoundException();
+    return {
+      message: `Commentaire n°${id} supprimé`,
+      data: commentDeleted,
+    };
   }
 }
