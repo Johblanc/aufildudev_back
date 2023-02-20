@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { BadRequestException, ConflictException } from '@nestjs/common/exceptions';
 import { LanguagesService } from './languages.service';
 import { CreateLanguageDto } from './dto/create-language.dto';
@@ -16,9 +16,8 @@ export class LanguagesController {
 
   @Post()
   async create(@Body() createLanguageDto: CreateLanguageDto) {
-    const verificationName = await Language.findOneBy({
-      name: In([])
-    });
+    const verificationName = await this.languagesService.findOneLanguageName(createLanguageDto.name)
+
     if (verificationName) {
       throw new ConflictException('Language deja existant')
     };
@@ -26,17 +25,9 @@ export class LanguagesController {
     const newLanguage = await this.languagesService.createLanguage(
       createLanguageDto
     );
-
-    if (newLanguage===null){
-    console.log(createLanguageDto);
-        throw new BadRequestException("Nom du langugage manquant");
-    }
-      
-    else {
-      return {
-        message: 'nouveau language ajoute',
-        data: newLanguage
-      }
+    return {
+      message: 'nouveau language ajoute',
+      data: newLanguage
     }
   }
 

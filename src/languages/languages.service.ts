@@ -28,6 +28,11 @@ export class LanguagesService {
   }
 
 
+  async findOneLanguageName(name: string) {
+    return await Language.findOneBy({ name: name });
+  }
+
+  
   async findManyLanguage(languageId: number[]) {
     const languages = await Language.findBy({
       id: ArrayContains([languageId])
