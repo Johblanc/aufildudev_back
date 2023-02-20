@@ -22,6 +22,7 @@ export class LanguagesService {
   }
 
 
+  
   async findOneLanguage(languageId: number) {
     const language = await Language.findOneBy({ id: languageId });
     return language
@@ -32,7 +33,7 @@ export class LanguagesService {
     return await Language.findOneBy({ name: name });
   }
 
-  
+
   async findManyLanguage(languageId: number[]) {
     const languages = await Language.findBy({
       id: ArrayContains([languageId])
