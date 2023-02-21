@@ -1,34 +1,97 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { FrameworksService } from './frameworks.service';
+import { ConflictException, NotFoundException } from '@nestjs/common/exceptions';
+import { ApiTags } from '@nestjs/swagger';
 import { CreateFrameworkDto } from './dto/create-framework.dto';
 import { UpdateFrameworkDto } from './dto/update-framework.dto';
+import { FrameworksService } from './frameworks.service';
 
+
+
+
+@ApiTags('frameworks')
 @Controller('frameworks')
 export class FrameworksController {
-  constructor(private readonly frameworksService: FrameworksService) {}
+  constructor(private readonly frameworkService: FrameworksService) { }
 
   @Post()
-  create(@Body() createFrameworkDto: CreateFrameworkDto) {
-    return this.frameworksService.create(createFrameworkDto);
+  async create(@Body() createFrameworkDto: CreateFrameworkDto) {
+    const verificationName = await this.frameworkService.findOneFrameworkName(createFrameworkDto.name)
+
+    if (verificationName) {
+      throw new ConflictException('Framework déja existant')
+    };
+
+    const newFramework = await this.frameworkService.createFramework(
+      createFrameworkDto
+    );
+    return {
+      message: 'nouveau Framework ajouté',
+      data: newFramework
+    }
   }
+
 
   @Get()
-  findAll() {
-    return this.frameworksService.findAll();
+  async findAll() {
+    const data = await this.frameworkService.findAllFrameworks();
+
+    if (data.length != 0) {
+      return {
+        message: 'liste des Frameworks disponible',
+        data: data
+      }
+    }
+    throw new NotFoundException('aucun Framework disponible')
   }
+
+
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.frameworksService.findOne(+id);
+  async findOne(@Param('id') id: number) {
+    const data = await this.frameworkService.findOneFramework(+id)
+
+    if (!data) {
+      throw new NotFoundException("l'ID ne correspond à aucun Framework")
+    };
+    return {
+      message: "Framework:",
+      data: data
+    }
   }
+
+
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFrameworkDto: UpdateFrameworkDto) {
-    return this.frameworksService.update(+id, updateFrameworkDto);
+  async updateFramework(
+    @Param('id') id: number,
+    @Body() updateFrameworkDto: UpdateFrameworkDto
+  ) {
+    const data = await this.frameworkService.findOneFramework(+id);
+
+    if (!data) {
+      throw new NotFoundException("l'ID' ne correspond à aucun Framework")
+    }
+    const result = await this.frameworkService.updateFramework(data.id, updateFrameworkDto);
+    return {
+      message: "Framework modifié",
+      data: result
+    }
   }
 
+
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.frameworksService.remove(+id);
+  async remove(@Param('id') id: number) {
+    const data = await this.frameworkService.findOneFramework(+id)
+
+    if (!data) {
+      throw new NotFoundException("l'ID' ne correspond à aucun Framework")
+    }
+    const remove = await this.frameworkService.removeFramework(id)
+
+    return {
+      message: "Le language à bien été supprimé",
+      data: remove
+    }
   }
+
 }
