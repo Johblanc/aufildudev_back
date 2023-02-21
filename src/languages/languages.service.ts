@@ -22,9 +22,15 @@ export class LanguagesService {
   }
 
 
+  
   async findOneLanguage(languageId: number) {
     const language = await Language.findOneBy({ id: languageId });
     return language
+  }
+
+
+  async findOneLanguageName(name: string) {
+    return await Language.findOneBy({ name: name });
   }
 
 
