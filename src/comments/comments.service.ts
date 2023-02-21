@@ -41,7 +41,9 @@ export class CommentsService {
       select: {
         id: true,
         content: true,
-        article: { id: true, title: true, created_at: true, update_at: true },
+        created_at: true,
+        updated_at: true,
+        article: { id: true, title: true },
         user: { pseudo: true },
       },
       where: { deleted_at: IsNull() },
