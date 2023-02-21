@@ -16,6 +16,7 @@ import { Category } from './categories/entities/category.entity';
 import { Framework } from './frameworks/entities/framework.entity';
 import { Comment } from './comments/entities/comment.entity';
 import { Requierment } from './requierments/entities/requierment.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { Requierment } from './requierments/entities/requierment.entity';
     LanguagesModule,
     CategoriesModule,
     FrameworksModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
