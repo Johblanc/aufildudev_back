@@ -11,7 +11,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/');
   app.useGlobalFilters(new HttpExceptionFilter());
-
+  app.enableCors();
   const config = new DocumentBuilder()
     .setTitle('Au Fil du Dev')
     .setDescription('API description')
