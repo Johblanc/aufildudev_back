@@ -37,8 +37,13 @@ export class CommentsService {
 
   async findAll(): Promise<Comment[] | null> {
     return await Comment.find({
-      relations: { article: true },
-      select: { id: true, content: true, article: { id: true, title: true } },
+      relations: { article: true, user: true },
+      select: {
+        id: true,
+        content: true,
+        article: { id: true, title: true, created_at: true, update_at: true },
+        user: { pseudo: true },
+      },
       where: { deleted_at: IsNull() },
     });
   }
