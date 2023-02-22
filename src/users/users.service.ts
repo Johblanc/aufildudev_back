@@ -36,7 +36,7 @@ if (user) {
     return null;
   }
 
-  //Service pour
+  //Service pour promouvoir un user :
   async promoteUser(promoteAdminDto: PromoAdminDto): Promise<User | null> {
     const user = await this.findOneByPseudo(promoteAdminDto.pseudo)
 

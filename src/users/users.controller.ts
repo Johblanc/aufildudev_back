@@ -55,7 +55,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Patch("promote")
   async promoAdmin(@Body() promoteAdminDto: PromoAdminDto, @Request() req: any) {
-    const adminId = req.user.id // Admin Id
+    const adminId = req.user.id
     const admin = await this.usersService.findOneById(adminId);
     if (admin === null) {
       throw new NotFoundException("Vous n'êtes pas enregistré dans la base.")

@@ -11,7 +11,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: process.env.JWTCONSTANTS,
     });
   }
-
+  
+//Retourne le token :
   async validate(payload: any) {
     return { id: payload.sub, username: payload.username };
   }
