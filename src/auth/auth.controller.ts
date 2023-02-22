@@ -1,7 +1,9 @@
-import { Controller, Post, NotFoundException, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { LocalAuthGuard } from './local-auth.guards';
+import { ClassSerializerInterceptor } from '@nestjs/common';
+
 
 @Controller('auth')
 export class AuthController {
@@ -10,6 +12,7 @@ export class AuthController {
         private authService: AuthService
     ) { }
 
+    @UseInterceptors(ClassSerializerInterceptor)
     @UseGuards(LocalAuthGuard)
     @Post('login')
     async login(@Request() req: any) {

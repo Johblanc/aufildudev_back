@@ -9,6 +9,7 @@ import {
   Unique,
   OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 @Unique(['pseudo', 'email'])
@@ -25,6 +26,7 @@ export class User extends BaseEntity {
   @Column({ name: 'email', type: 'varchar' })
   email: string;
 
+  @Exclude()
   @ApiProperty()
   @Column({ type: 'varchar' })
   password: string;

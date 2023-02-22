@@ -1,9 +1,13 @@
-import { Controller, Get, ValidationPipe, Post, Body, Patch, Param, Delete, ConflictException, UsePipes} from '@nestjs/common';
+import { Controller, UseInterceptors, Request, Post, Body, Patch, ConflictException, UseGuards, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PromoAdminDto } from './dto/promo-admin.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from 'src/auth/auth.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guards';
+import { ClassSerializerInterceptor } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common/exceptions';
 
 @Controller('users')
 export class UsersController {
@@ -12,8 +16,8 @@ export class UsersController {
     private authService: AuthService
   ) { }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post('register')
-  @UsePipes(new ValidationPipe({ transform: true }))
   async register(@Body() createUserDto: CreateUserDto) {
     const userExist = await this.usersService.findOneByMail(createUserDto.email);
 
@@ -26,41 +30,49 @@ export class UsersController {
     const data = await this.usersService.create(createUserDto);
     return {
       statusCode: 201,
-      message: `${createUserDto.pseudo} utilisateur enregistré`,
+      message: `${createUserDto.pseudo} a bien été enregistré`,
       succes: 'Created',
       data: data,
     };
   }
 
-  /* @Post('login')
-  @UsePipes(new ValidationPipe({ transform: true }))
 
-  async login(@Request() req: any) {
-    const user = await this.usersService.findOneByMail(req.body.mail)
-    if (!user) {
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
+  @Patch()
+  async updateUser(@Body() updateUserDto: UpdateUserDto, @Request() req: any) {
+    const userId = req.user.id
+    updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    const user = await this.usersService.updateUser(userId, updateUserDto);
+
+    return {
+      message: "La modification a bien été enregistrée",
+      data: user
+    }
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
+  @Patch("promote")
+  async promoAdmin(@Body() promoteAdminDto: PromoAdminDto, @Request() req: any) {
+    const adminId = req.user.id // Admin Id
+    const admin = await this.usersService.findOneById(adminId);
+    if (admin === null) {
+      throw new NotFoundException("Vous n'êtes pas enregistré dans la base.")
+    }
+
+    if (admin.access_lvl < 4) {
+      throw new UnauthorizedException("Vous n'avez pas le niveau d'accès requis.")
+    }
+
+    const user = await this.usersService.promoteUser(promoteAdminDto);
+    if (user === null) {
       throw new NotFoundException("Cet utilisateur n'existe pas.")
     }
-    return this.authService.login(user);
-  } */
 
-
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return {
+      message: `${user.pseudo} est passé au niveau d'acces ${user.access_lvl}`,
+      data: user
+    }
   }
 }
