@@ -94,22 +94,33 @@ export class ArticlesService {
       
       await article.save({}) ;
       if (data.requirements){
-        const askRequireIds = data.requirements.map(item => item.id)
         const curRequireIds = article.requirements.map(item => item.asRequirement().id)
         
-        const requireAdd = askRequireIds
+        const requireAdd = data.requirements
         .filter(
           item => 
-          !curRequireIds.includes(item)
+          !curRequireIds.includes(item.id)
         )
-        console.log(requireAdd);
+
+        const requireDel = article.requirements
+        .filter(
+          item => 
+          !data.requirements?.map(item => item.id).includes(item.id)
+        )
+
+        console.log(requireDel);
         
         
-        /*
-        data.requirements.forEach(async item => {
-          await Requierment.create({article : article, article_needed : item}).save()
-        })
-        */
+        await Promise.all(
+          requireAdd.map(async item => {
+            await Requierment.create({article : article, article_needed : item}).save()
+          })
+        )
+        
+        await Promise.all(
+          requireDel.map(async item => {await item.remove()})
+        )
+        
       }
       return await this.findOne(article.id);
     }
