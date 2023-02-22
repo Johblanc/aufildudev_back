@@ -1,4 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, UseGuards, Request, } from '@nestjs/common';
+import { GetUser } from 'src/auth/get-user.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guards';
 import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/entities/category.entity';
 import { Framework } from 'src/frameworks/entities/framework.entity';
@@ -50,7 +52,7 @@ export class ArticlesController {
     const frameworksList = await this.frameworksService.findManyFramework(frameworks)
 
 
-    const requirementsList = await this.articlesService.findIds(requirements);
+    const requirementsList = await this.articlesService.findIds(requirements)
 
     const data = await this.articlesService.create({
       ...base,
@@ -81,8 +83,10 @@ export class ArticlesController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
+  async update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto, @GetUser() user : User) {
+    
     const { requirements, languages, categories, frameworks,...base} = updateArticleDto ;
     const isExist = await this.articlesService.findOne(+id)
     if (isExist === null ){
@@ -111,7 +115,10 @@ export class ArticlesController {
     
     let requirementsList : Article[] = []
     if (requirements){
-      requirementsList = await this.articlesService.findIds(requirements);
+      requirementsList = (
+        await this.articlesService.findIds(requirements)
+      )
+      .filter(item => item.id !== +id);
     }
 
     return  {

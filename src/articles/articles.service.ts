@@ -24,10 +24,11 @@ export class ArticlesService {
     const { requirements , ...creatObject} = data
     const article = await Article.create({...creatObject}).save()
     
-    requirements.forEach(async item => {
-      await Requierment.create({article : article, article_needed : item}).save()
-    })
-    
+    await Promise.all(
+      requirements.map(async item => {
+        await Requierment.create({article : article, article_needed : item}).save()
+      })
+    )
     return await this.findOne(article.id); 
   }
 
@@ -81,23 +82,36 @@ export class ArticlesService {
     frameworks? : Framework[] ,
   }) 
   {
-    const article = await Article.findOneBy({id:id})
-
+    const article = await this.findOne(id)
+    
     if ( article !== null ){
-      data.title          && (article.title = data.title) ;
-      data.content        && (article.content = data.content) ;
-      data.languages      && (article.languages = data.languages) ;
-      data.categories     && (article.categories = data.categories) ;
-      data.frameworks     && (article.frameworks = data.frameworks) ;
-      data.requirements   && (article.requirements = []) ;
-      await article.save()
+      if (data.title) article.title = data.title ;
+      if (data.content) article.content = data.content ;
+      if (data.languages) article.languages = data.languages ;
+      if (data.categories) article.categories = data.categories ;
+      if (data.frameworks) article.frameworks = data.frameworks ;
+      console.log();
       
+      await article.save({}) ;
       if (data.requirements){
+        const askRequireIds = data.requirements.map(item => item.id)
+        const curRequireIds = article.requirements.map(item => item.asRequirement().id)
+        
+        const requireAdd = askRequireIds
+        .filter(
+          item => 
+          !curRequireIds.includes(item)
+        )
+        console.log(requireAdd);
+        
+        
+        /*
         data.requirements.forEach(async item => {
           await Requierment.create({article : article, article_needed : item}).save()
         })
-        return await this.findOne(article.id);
+        */
       }
+      return await this.findOne(article.id);
     }
     return null;
   }
