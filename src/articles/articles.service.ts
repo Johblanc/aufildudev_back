@@ -72,11 +72,37 @@ export class ArticlesService {
     return await Article.findOneBy({title : title});
   }
 
-  async update(id: number, updateArticleDto: UpdateArticleDto) {
-    return `This action updates a #${id} article`;
+  async update(id: number, data : {
+    title? : string, 
+    content? : string, 
+    requirements? : Article[] ,
+    languages? : Language[] ,
+    categories? : Category[] ,
+    frameworks? : Framework[] ,
+  }) 
+  {
+    const article = await Article.findOneBy({id:id})
+
+    if ( article !== null ){
+      data.title          && (article.title = data.title) ;
+      data.content        && (article.content = data.content) ;
+      data.languages      && (article.languages = data.languages) ;
+      data.categories     && (article.categories = data.categories) ;
+      data.frameworks     && (article.frameworks = data.frameworks) ;
+      data.requirements   && (article.requirements = []) ;
+      await article.save()
+      
+      if (data.requirements){
+        data.requirements.forEach(async item => {
+          await Requierment.create({article : article, article_needed : item}).save()
+        })
+        return await this.findOne(article.id);
+      }
+    }
+    return null;
   }
 
   async remove(id: number) {
-    return `This action removes a #${id} article`;
+    return await (await Article.findOneBy({id}))?.remove();
   }
 }

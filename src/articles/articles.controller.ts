@@ -1,16 +1,25 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, } from '@nestjs/common';
+import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/entities/category.entity';
 import { Framework } from 'src/frameworks/entities/framework.entity';
+import { FrameworksService } from 'src/frameworks/frameworks.service';
 import { Language } from 'src/languages/entities/language.entity';
+import { LanguagesService } from 'src/languages/languages.service';
 import { User } from 'src/users/entities/user.entity';
 import { In } from 'typeorm';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
+import { Article } from './entities/article.entity';
 
 @Controller('articles')
 export class ArticlesController {
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(
+    private readonly articlesService: ArticlesService ,
+    private readonly languagesService: LanguagesService ,
+    private readonly categoriesService : CategoriesService ,
+    private readonly frameworksService : FrameworksService
+    ) {}
 
   @Post()
   async create(@Body() createArticleDto: CreateArticleDto) {
@@ -27,40 +36,33 @@ export class ArticlesController {
     if (user === null){
       throw new ConflictException("Ce user n'existe pas")
     }
-    /*
-    // A FAIRE ---> Recupération de la liste des langages
-    const languagesList = await this.languagesService.findIds(languages)
-    if (languagesList.lenght < 1) {
+    
+    const languagesList = await this.languagesService.findManyLanguage(languages)
+    if (languagesList.length < 1) {
       throw new BadRequestException("Il faut au moins un langage valide") 
     }
-    */
-    const languagesList = await Language.findBy({id : In(languages)})
-    /*
-    // A FAIRE ---> Recupération de la liste des categories
-    const categoriesList = await this.categoriesService.findIds(categories)
-    if (categoriesList.lenght < 1) {
+    
+    const categoriesList = await this.categoriesService.findManyCategories(categories)
+    if (categoriesList.length < 1) {
       throw new BadRequestException("Il faut au moins une categorie valide") 
     }
-    */
-    const categoriesList = await Category.findBy({id : In(categories)})
-    /*
-    // A FAIRE ---> Recupération de la liste des frameworks
-    const frameworksList = await this.frameworksService.findIds(frameworks)
-    */
-    const frameworksList = await Framework.findBy({id : In(frameworks)})
+
+    const frameworksList = await this.frameworksService.findManyFramework(frameworks)
+
 
     const requirementsList = await this.articlesService.findIds(requirements);
 
-    return {
-      message : "L'article a bien été créé",
-      data : await this.articlesService.create({
+    const data = await this.articlesService.create({
       ...base,
       user : user,
       requirements :requirementsList,
       languages : languagesList,
       categories : categoriesList,
       frameworks : frameworksList
-    }) }
+    })
+    return {
+      message : "L'article a bien été créé",
+      data : data }
   }
 
   @Get()
@@ -81,14 +83,56 @@ export class ArticlesController {
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto) {
+    const { requirements, languages, categories, frameworks,...base} = updateArticleDto ;
+    const isExist = await this.articlesService.findOne(+id)
+    if (isExist === null ){
+      throw new NotFoundException("Cette article n'existe pas")
+    }
+    let languagesList : Language[] = []
+    if (languages){
+      languagesList = await this.languagesService.findManyLanguage(languages)
+      if (languagesList.length < 1) {
+        throw new BadRequestException("Il faut au moins un langage valide") 
+      }
+    }
+    
+    let categoriesList : Category[] = []
+    if (categories){
+      categoriesList = await this.categoriesService.findManyCategories(categories)
+      if (categoriesList.length < 1) {
+        throw new BadRequestException("Il faut au moins une categorie valide") 
+      }
+    }
+    
+    let frameworksList : Framework[] = []
+    if (frameworks){
+      frameworksList = await this.frameworksService.findManyFramework(frameworks)
+    }
+    
+    let requirementsList : Article[] = []
+    if (requirements){
+      requirementsList = await this.articlesService.findIds(requirements);
+    }
+
     return  {
       message : "Modification d'un article",
-      data : await this.articlesService.update(+id, updateArticleDto) 
+      data : (await this.articlesService.update(+id, {
+        ...base ,
+        languages    : languages    ? languagesList    : undefined ,
+        categories   : categories   ? categoriesList   : undefined ,
+        frameworks   : frameworks   ? frameworksList   : undefined ,
+        requirements : requirements ? requirementsList : undefined ,
+
+      }) )
     }
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    const isExist = await this.articlesService.findOne(+id)
+    if (isExist === null ){
+      throw new NotFoundException("Cette article n'existe pas")
+    }
     return  {
       message : "Suppression d'un article",
       data : await this.articlesService.remove(+id) 

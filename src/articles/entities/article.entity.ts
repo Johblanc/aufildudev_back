@@ -2,7 +2,7 @@
 import { Category } from "src/categories/entities/category.entity";
 import { Framework } from "src/frameworks/entities/framework.entity";
 import { Language } from "src/languages/entities/language.entity";
-import { Entity,Column,PrimaryGeneratedColumn,ManyToOne,OneToMany,ManyToMany,JoinTable} from "typeorm";
+import { Entity,Column,PrimaryGeneratedColumn,ManyToOne,OneToMany,ManyToMany,JoinTable, UpdateDateColumn, CreateDateColumn} from "typeorm";
 import { Unique } from "typeorm/decorator/Unique";
 import { BaseEntity } from "typeorm/repository/BaseEntity";
 import { ApiProperty } from '@nestjs/swagger';
@@ -31,12 +31,12 @@ export class Article extends BaseEntity {
     is_public: boolean;
 
     @ApiProperty()
-    @Column({ type: 'timestamptz', default: new Date() })
+    @CreateDateColumn({ type: 'timestamptz', default: new Date() })
     created_at: Date;
 
     @ApiProperty()
-    @Column({ type: 'timestamptz', default: null, nullable: true })
-    update_at: Date;
+    @UpdateDateColumn({ type: 'timestamptz', default: null, nullable: true })
+    updated_at: Date;
 
     @ApiProperty()
     @Column({ type: 'timestamptz', default: null, nullable: true })
