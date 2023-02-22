@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ArrayContains } from 'typeorm';
+import { In } from 'typeorm';
 import { CreateLanguageDto } from './dto/create-language.dto';
 import { UpdateLanguageDto } from './dto/update-language.dto';
 import { Language } from './entities/language.entity';
@@ -36,7 +36,7 @@ export class LanguagesService {
 
   async findManyLanguage(languageId: number[]) {
     const languages = await Language.findBy({
-      id: ArrayContains([languageId])
+      id: In(languageId)
     })
     return languages
   }

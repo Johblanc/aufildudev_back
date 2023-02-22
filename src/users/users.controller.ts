@@ -12,8 +12,7 @@ import { UnauthorizedException } from '@nestjs/common/exceptions';
 @Controller('users')
 export class UsersController {
   constructor(
-    private readonly usersService: UsersService,
-    private authService: AuthService
+    private readonly usersService: UsersService
   ) { }
 
   @UseInterceptors(ClassSerializerInterceptor)

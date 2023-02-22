@@ -22,6 +22,5 @@ export class Language extends BaseEntity {
   name: string;
 
   @ManyToMany(() => Article, (article) => article.languages)
-  @JoinTable()
   articles: Article[];
 }

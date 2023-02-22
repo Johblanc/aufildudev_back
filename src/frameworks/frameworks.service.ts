@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ArrayContains } from 'typeorm';
+import { In } from 'typeorm';
 import { CreateFrameworkDto } from './dto/create-framework.dto';
 import { UpdateFrameworkDto } from './dto/update-framework.dto';
 import { Framework } from './entities/framework.entity';
@@ -38,7 +38,7 @@ export class FrameworksService {
 
   async findManyFramework(frameworkId: number[]) {
     const data = await Framework.findBy({
-      id: ArrayContains([frameworkId])
+      id: In(frameworkId)
     })
     return data
   }

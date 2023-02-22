@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ArrayContains } from 'typeorm';
+import { In } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
@@ -37,7 +37,7 @@ export class CategoriesService {
 
   async findManyCategories(categorieId: number[]) {
     const data = await Category.findBy({
-      id: ArrayContains([categorieId])
+      id: In(categorieId)
     })
     return data
   }
