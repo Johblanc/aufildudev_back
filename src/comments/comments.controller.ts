@@ -87,7 +87,7 @@ export class CommentsController {
   @Get('article/:id')
   @Bind(Param('id', new ParseIntPipe()))
   async find(@Param('id') id: string) {
-    const isExist = await this.articlesService.findOne(+id);
+    const isExist = await this.articlesService.findOneById(+id);
     if (!isExist) throw new NotFoundException();
     return {
       message: `Voici tout les commentaire de l'article ${id}.`,

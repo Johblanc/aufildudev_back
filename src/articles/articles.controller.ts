@@ -1,6 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, UseGuards, Request, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, UseGuards, Request, ForbiddenException, ClassSerializerInterceptor, UseInterceptors, } from '@nestjs/common';
+import { GetAuthor } from 'src/auth/get-author.decorator';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guards';
+import { Roles } from 'src/auth/roles/roles.decorator';
+import { Role } from 'src/auth/roles/roles.enum';
+import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/entities/category.entity';
 import { Framework } from 'src/frameworks/entities/framework.entity';
@@ -21,52 +25,91 @@ export class ArticlesController {
     private readonly languagesService: LanguagesService ,
     private readonly categoriesService : CategoriesService ,
     private readonly frameworksService : FrameworksService
-    ) {}
+  ) {}
 
-  @Post()
-  async create(@Body() createArticleDto: CreateArticleDto) {
+  /**
+   * Création d'un nouvel **Article**
+   * @param createArticleDto  propriétés du nouvel **Article**
+   * @param user              le **User** effectuant la requete
+   * @param isPublic          l'**Article** est-il publique ou privé
+   * @returns                 le nouvel **Article**
+   */
+  async create( createArticleDto: CreateArticleDto, user : User, isPublic : boolean = false ) 
+  {
+    /** Déconstruction de la Dto */
     const { requirements, languages, categories, frameworks,...base} = createArticleDto ;
-    const userId = 1 ; // A FAIRE ---> Vérifiction du User dans le token
-    const isExist = await this.articlesService.findOneByName(createArticleDto.title)
+
+    /** Vérification que le titre est unique */
+    const isExist = await this.articlesService.findOneByTitle(createArticleDto.title)
     if (isExist)
     {
       throw new ConflictException("Ce titre est déjà pris")
     }
-    // A FAIRE ---> Vérifiction du User dans le token
-    //const user = await this.usersService.findOne(userId)
-    const user = await User.findOneBy({id : userId})
-    if (user === null){
-      throw new ConflictException("Ce user n'existe pas")
-    }
     
+    /** Récupération de la liste des **Langages** liés à l'**Article** */
     const languagesList = await this.languagesService.findManyLanguage(languages)
     if (languagesList.length < 1) {
       throw new BadRequestException("Il faut au moins un langage valide") 
     }
     
+    /** Récupération de la liste des **Catégories** liées à l'**Article** */
     const categoriesList = await this.categoriesService.findManyCategories(categories)
     if (categoriesList.length < 1) {
       throw new BadRequestException("Il faut au moins une categorie valide") 
     }
 
+    /** Récupération de la liste des **FrameWorks** liés à l'**Article** */
     const frameworksList = await this.frameworksService.findManyFramework(frameworks)
 
+    /** Récupération de la liste des **Articles prérequis** liés à l'**Article** */
+    const requirementsList = await this.articlesService.findManyByIds(requirements)
 
-    const requirementsList = await this.articlesService.findIds(requirements)
-
-    const data = await this.articlesService.create({
+    /** Création du nouvel **Article** */
+    const newArticle = await this.articlesService.create({
       ...base,
       user : user,
       requirements :requirementsList,
       languages : languagesList,
       categories : categoriesList,
-      frameworks : frameworksList
+      frameworks : frameworksList ,
+      isPublic : isPublic
     })
+    return newArticle 
+  }
+
+  /**
+   * Demande de création d'un nouvel **Article** privé
+   * @param createArticleDto  propriétés du nouvel **Article**
+   * @param user              le **User** effectuant la requete
+   * @returns                 le nouvel **Article**
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async createPrivate(@Body() createArticleDto: CreateArticleDto, @GetUser() user : User) 
+  {
+    const data = await this.create(createArticleDto,user)
     return {
       message : "L'article a bien été créé",
       data : data }
   }
 
+  /**
+   * Demande de création d'un nouvel **Article** publique
+   * @param createArticleDto  propriétés du nouvel **Article**
+   * @param user              le **User** effectuant la requete
+   * @returns                 le nouvel **Article**
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post("public")
+  async createPublic(@Body() createArticleDto: CreateArticleDto, @GetUser() user : User) 
+  {
+    const data = await this.create(createArticleDto,user,true)
+    return {
+      message : "L'article a bien été créé",
+      data : data }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
     return {
@@ -79,19 +122,25 @@ export class ArticlesController {
   async findOne(@Param('id') id: string) {
     return  {
       message : "Récupération d'un article",
-      data : (await this.articlesService.findOne(+id))?.asObject() 
+      data : (await this.articlesService.findOneById(+id))?.asObject() 
     }
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto, @GetUser() user : User) {
     
     const { requirements, languages, categories, frameworks,...base} = updateArticleDto ;
-    const isExist = await this.articlesService.findOne(+id)
+    const isExist = await this.articlesService.findOneById(+id)
     if (isExist === null ){
       throw new NotFoundException("Cette article n'existe pas")
     }
+
+    if ( isExist.user.id !== user.id ){
+      throw new ForbiddenException("Vous n'etes pas le propriétaire de cette article")
+    }
+
     let languagesList : Language[] = []
     if (languages){
       languagesList = await this.languagesService.findManyLanguage(languages)
@@ -116,33 +165,35 @@ export class ArticlesController {
     let requirementsList : Article[] = []
     if (requirements){
       requirementsList = (
-        await this.articlesService.findIds(requirements)
+        await this.articlesService.findManyByIds(requirements)
       )
       .filter(item => item.id !== +id);
     }
 
+    const updateData = {
+      ...base ,
+      languages    : languages    ? languagesList    : undefined ,
+      categories   : categories   ? categoriesList   : undefined ,
+      frameworks   : frameworks   ? frameworksList   : undefined ,
+      requirements : requirements ? requirementsList : undefined ,
+
+    }
+
     return  {
       message : "Modification d'un article",
-      data : (await this.articlesService.update(+id, {
-        ...base ,
-        languages    : languages    ? languagesList    : undefined ,
-        categories   : categories   ? categoriesList   : undefined ,
-        frameworks   : frameworks   ? frameworksList   : undefined ,
-        requirements : requirements ? requirementsList : undefined ,
-
-      }) )
+      data : (await this.articlesService.update(+id, updateData) )?.asObject()
     }
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    const isExist = await this.articlesService.findOne(+id)
+    const isExist = await this.articlesService.findOneById(+id)
     if (isExist === null ){
       throw new NotFoundException("Cette article n'existe pas")
     }
     return  {
       message : "Suppression d'un article",
-      data : await this.articlesService.remove(+id) 
+      data : (await this.articlesService.remove(+id))?.asObject()
     }
   }
 }

@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateArticleDto } from './dto/create-article.dto';
-import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { IsNull,In } from 'typeorm';
 import { Requierment } from 'src/requierments/entities/requierment.entity';
@@ -11,123 +9,191 @@ import { Framework } from 'src/frameworks/entities/framework.entity';
 
 @Injectable()
 export class ArticlesService {
-  async create(data : {
-    user : User , 
-    title : string, 
-    content : string, 
-    requirements : Article[] ,
-    languages : Language[] ,
-    categories : Category[] ,
-    frameworks : Framework[] ,
-  }) 
+
+  /** 
+   * Ensembles des relations pour la table **Articles**
+   * *(Voir constructor)*
+   * */
+  allRelations : any
+  constructor()
   {
-    const { requirements , ...creatObject} = data
+    this.allRelations = {
+      user : true,
+      languages : true,
+      categories : true,
+      frameworks : true,
+      needed_for : { article : true },
+      requirements : { article_needed : true }
+    }
+  }
+
+  /**
+   * *async* Création d'un **Article** dans la base de donnée
+   * @param data  informations sur l'**Article** à créer
+   * @returns     le nouvel **Article et ses relations** 
+   */
+  async create(
+    data : {
+      user : User , 
+      title : string, 
+      content : string, 
+      requirements : Article[] ,
+      languages : Language[] ,
+      categories : Category[] ,
+      frameworks : Framework[] ,
+      isPublic : boolean
+    }
+  ) : Promise<Article | null>
+  {
+    /** Séparation des requirements de data avec un deconstruction partielle */
+    const { requirements , ...creatObject} = data ;
+
+    /** Nouvel **Article** sans ses requirements */
     const article = await Article.create({...creatObject}).save()
     
+
+    /** Ajout des liaisons requirements */
     await Promise.all(
       requirements.map(async item => {
         await Requierment.create({article : article, article_needed : item}).save()
       })
     )
-    return await this.findOne(article.id); 
+
+    return await this.findOneById(article.id); 
   }
 
-  async findAll() {
+  /**
+   * *async* Recherche de tous les **Articles** dans la base de donnée
+   * @returns tous les **Articles et leurs relations** actif
+   */
+  async findAll() : Promise<Article[]>
+  {
     return await Article.find({
       where : {
         deleted_at : IsNull()
       },
-      relations :{
-        user : true,
-        languages : true,
-        categories : true,
-        frameworks : true,
-        needed_for : { article : true },
-        requirements : { article_needed : true }
-      }
+      relations : this.allRelations
     });
   }
 
-  async findIds(ids: number[]) {
+  /**
+   * *async* Recherche par id d' **Articles** dans la base de donnée
+   * @param ids   des **Articles** à trouver
+   * @returns     la liste des **Articles**
+   */
+  async findManyByIds(ids: number[]) : Promise<Article[]>
+  {
     return await Article.findBy({ id : In(ids), deleted_at : IsNull() });
   }
 
-  async findOne(id: number) { 
+  /**
+   * *async* Recherche par id d'un **Article et ses relations** dans la base de donnée
+   * @param id      de l'**Article** à trouver
+   * @returns       l'**Article et ses relations** ou null s'il n'existe pas
+   */
+  async findOneById(id: number)  : Promise<Article | null>
+  { 
     return await Article.findOne({
       where : {
         id : id,
         deleted_at : IsNull()
       },
-      relations :{
-        user : true,
-        languages : true,
-        categories : true,
-        frameworks : true,
-        needed_for : { article : true },
-        requirements : { article_needed : true }
-      }
+      relations : this.allRelations
     });
   }
 
-  async findOneByName(title: string) {
+  /**
+   * *async* Recherche par titre d'un **Article** dans la base de donnée
+   * @param title   de l'**Article** à trouver
+   * @returns       l'**Article** ou null s'il n'existe pas
+   */
+  async findOneByTitle(title: string)  : Promise<Article | null>
+  {
     return await Article.findOneBy({title : title});
   }
 
-  async update(id: number, data : {
-    title? : string, 
-    content? : string, 
-    requirements? : Article[] ,
-    languages? : Language[] ,
-    categories? : Category[] ,
-    frameworks? : Framework[] ,
-  }) 
+  /**
+   * *async* Modification d'un **Article** dans la base de donnée 
+   * @param id      de l'**Article** à modifier
+   * @param data    éventuelles modifictions des propriétés de l'**Article**
+   * @returns       l'**Article** modifié **et ses relations** ou null s'il n'existe pas
+   */
+  async update(
+    id: number, 
+    data : {
+      title? : string, 
+      content? : string, 
+      requirements? : Article[] ,
+      languages? : Language[] ,
+      categories? : Category[] ,
+      frameworks? : Framework[] ,
+    }
+  )  : Promise<Article | null>
   {
-    const article = await this.findOne(id)
+    /** L'**Article** à modifier */
+    const article = await this.findOneById(id)
     
     if ( article !== null ){
+      // Eventuelle modification pour tous les parametres sauf requirements
       if (data.title) article.title = data.title ;
       if (data.content) article.content = data.content ;
       if (data.languages) article.languages = data.languages ;
       if (data.categories) article.categories = data.categories ;
       if (data.frameworks) article.frameworks = data.frameworks ;
-      console.log();
       
+      // Enregistrement des modifications
       await article.save({}) ;
+
       if (data.requirements){
+
+        /** Liste des **Id** des **Articles** actuellement en requirements */
         const curRequireIds = article.requirements.map(item => item.asRequirement().id)
         
+        /** Liste des **Id** des **Articles** nouvellement en requirements */
+        const newRequireIds = data.requirements.map(item => item.id)
+        
+        /** Liste des **Articles** manquants */
         const requireAdd = data.requirements
         .filter(
           item => 
           !curRequireIds.includes(item.id)
         )
 
+        /** Liste des **Articles** surnuméraires */
         const requireDel = article.requirements
-        .filter(
-          item => 
-          !data.requirements?.map(item => item.id).includes(item.id)
-        )
+          .filter(
+            item => 
+            !newRequireIds.includes(item.asRequirement().id)
+          )
 
-        console.log(requireDel);
-        
-        
+          
+        // Mise à jour des requirements manquants
         await Promise.all(
           requireAdd.map(async item => {
             await Requierment.create({article : article, article_needed : item}).save()
           })
         )
-        
+          
+        // Mise à jour des requirements surnuméraires
         await Promise.all(
           requireDel.map(async item => {await item.remove()})
         )
         
       }
-      return await this.findOne(article.id);
+      return await this.findOneById(article.id);
     }
     return null;
   }
 
-  async remove(id: number) {
-    return await (await Article.findOneBy({id}))?.remove();
+  /**
+   * *async* Suppression d'un **Article** dans la base de donnée 
+   * @param id  de l'**Article** à supprimer
+   * @returns l'**Article** supprimé **et ses relations** ou null s'il n'existe pas
+   */
+  async remove(id: number) : Promise<Article | null>
+  {
+    const article = await Article.findOneBy({id : id})
+    if (article !== null)  await article.remove() ;
+    return article
   }
 }
