@@ -41,7 +41,10 @@ export class CategoriesController {
         data: data
       }
     }
-    throw new NotFoundException('aucune Categorie disponible')
+    return {
+      message: "pas de frameworks disponibles",
+      data: data
+    }
   }
 
 
