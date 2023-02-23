@@ -26,8 +26,8 @@ export class Article extends BaseEntity {
     content: string;
 
     @ApiProperty()
-    @Column({ type: 'boolean', default: false })
-    is_public: boolean;
+    @Column({ type: 'varchar', default: "private" })
+    status: string;
 
     @ApiProperty()
     @CreateDateColumn({ type: 'timestamptz', default: new Date() })
@@ -70,7 +70,7 @@ export class Article extends BaseEntity {
             id : this.id,
             title : this.title,
             content : this.comments,
-            is_public : this.is_public,
+            status : this.status,
             user_pseudo : this.user.pseudo,
             created_at : this.created_at,
             requirements : this.requirements.map(item => item.asRequirement()),

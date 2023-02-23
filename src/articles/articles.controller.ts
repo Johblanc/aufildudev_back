@@ -1,10 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, UseGuards, Request, ForbiddenException, ClassSerializerInterceptor, UseInterceptors, } from '@nestjs/common';
 import { GetAuthor } from 'src/auth/get-author.decorator';
+import { GetModerator } from 'src/auth/get-moderator.decorator';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guards';
-import { Roles } from 'src/auth/roles/roles.decorator';
-import { Role } from 'src/auth/roles/roles.enum';
-import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/entities/category.entity';
 import { Framework } from 'src/frameworks/entities/framework.entity';
@@ -12,7 +10,6 @@ import { FrameworksService } from 'src/frameworks/frameworks.service';
 import { Language } from 'src/languages/entities/language.entity';
 import { LanguagesService } from 'src/languages/languages.service';
 import { User } from 'src/users/entities/user.entity';
-import { In } from 'typeorm';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -72,7 +69,7 @@ export class ArticlesController {
       languages : languagesList,
       categories : categoriesList,
       frameworks : frameworksList ,
-      isPublic : isPublic
+      status : isPublic ? "public" : "private"
     })
     return newArticle 
   }
@@ -101,7 +98,7 @@ export class ArticlesController {
    */
   @UseGuards(JwtAuthGuard)
   @Post("public")
-  async createPublic(@Body() createArticleDto: CreateArticleDto, @GetUser() user : User) 
+  async createPublic(@Body() createArticleDto: CreateArticleDto, @GetAuthor() user : User) 
   {
     const data = await this.create(createArticleDto,user,true)
     return {
@@ -109,14 +106,34 @@ export class ArticlesController {
       data : data }
   }
 
-  @UseGuards(JwtAuthGuard)
+
+
+
   @Get()
-  async findAll() {
+  async findAllPublic() {
     return {
-      message : "Liste de tous les articles",
-      data :(await this.articlesService.findAll()).map(item => item.asObject())
+      message : "Liste de tous les articles public",
+      data :(await this.articlesService.findAllPublic()).map(item => item.asObject())
     } ;
   }
+
+
+
+
+
+  @UseGuards(JwtAuthGuard)
+  @Get("user")
+  async findAllMine(@GetUser() user : User) {
+    return {
+      message : `Liste de tous les articles de ${user.pseudo}`,
+      data : ( await this.articlesService.findAllMine(user.id)).map(item => item.asObject() )
+    } ;
+  }
+
+
+
+
+
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -184,6 +201,29 @@ export class ArticlesController {
       data : (await this.articlesService.update(+id, updateData) )?.asObject()
     }
   }
+
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
+  @Patch('submit/:id')
+  async submit(@Param('id') id: string, @GetUser() user : User) {
+  const isExist = await this.articlesService.findOneById(+id)
+  if (isExist === null ){
+    throw new NotFoundException("Cette article n'existe pas")
+  }
+
+  if ( isExist.user.id !== user.id ){
+    throw new ForbiddenException("Vous n'etes pas le propriétaire de cette article")
+  }
+  
+  
+  return  {
+    message : "Modification d'un article",
+    data : "(await this.articlesService.update(+id, updateData) )?.asObject()"
+  }
+  
+  }
+
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
