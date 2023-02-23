@@ -6,7 +6,7 @@ import { NotFoundException } from '@nestjs/common/exceptions';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
+  constructor( 
     private readonly usersService: UsersService
     ) {
     super({
@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   // Retoune le User
   async validate(payload: any) {
-    const user = this.usersService.findOneById(payload.sub)
+    const user = await this.usersService.findOneById(payload.sub)
     if (user === null) {
       throw new NotFoundException("Vous n'êtes pas dans la base de données")
     }
