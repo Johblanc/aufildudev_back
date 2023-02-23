@@ -41,7 +41,7 @@ export class ArticlesService {
       languages : Language[] ,
       categories : Category[] ,
       frameworks : Framework[] ,
-      isPublic : boolean
+      status : string
     }
   ) : Promise<Article | null>
   {
@@ -62,19 +62,55 @@ export class ArticlesService {
     return await this.findOneById(article.id); 
   }
 
+
+
   /**
-   * *async* Recherche de tous les **Articles** dans la base de donnée
+   * *async* Recherche de tous les **Articles** publiques dans la base de donnée
    * @returns tous les **Articles et leurs relations** actif
    */
-  async findAll() : Promise<Article[]>
+  async findAllPublic() : Promise<Article[]>
   {
     return await Article.find({
       where : {
-        deleted_at : IsNull()
+        deleted_at : IsNull(),
+        status : "public"
       },
       relations : this.allRelations
     });
   }
+
+  /**
+   * *async* Recherche de tous les **Articles** d'un user dans la base de donnée
+   * @returns tous les **Articles et leurs relations**  du user
+   */
+  async findAllMine(userId : number) : Promise<Article[]>
+  {
+    return await Article.find({
+      where : {
+        deleted_at : IsNull(),
+        user : { id : userId }
+      },
+      relations : this.allRelations
+    });
+  }
+
+  /**
+   * *async* Recherche de tous les **Articles** d'un user dans la base de donnée
+   * @returns tous les **Articles et leurs relations**  du user
+   */
+  async findAllSubmit() : Promise<Article[]>
+  {
+    return await Article.find({
+      where : {
+        deleted_at : IsNull(),
+        status : "submit"
+      },
+      relations : this.allRelations
+    });
+  }
+
+
+
 
   /**
    * *async* Recherche par id d' **Articles** dans la base de donnée
@@ -83,7 +119,7 @@ export class ArticlesService {
    */
   async findManyByIds(ids: number[]) : Promise<Article[]>
   {
-    return await Article.findBy({ id : In(ids), deleted_at : IsNull() });
+    return await Article.findBy({ id : In(ids), deleted_at : IsNull(), status : "public" });
   }
 
   /**
