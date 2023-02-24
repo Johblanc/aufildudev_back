@@ -5,7 +5,7 @@ import { Language } from "src/languages/entities/language.entity";
 import { Entity,Column,PrimaryGeneratedColumn,ManyToOne,OneToMany,ManyToMany,JoinTable, UpdateDateColumn, CreateDateColumn} from "typeorm";
 import { Unique } from "typeorm/decorator/Unique";
 import { BaseEntity } from "typeorm/repository/BaseEntity";
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiTags } from '@nestjs/swagger';
 import { Comment } from 'src/comments/entities/comment.entity';
 import { Requierment } from 'src/requierments/entities/requierment.entity';
 import { User } from 'src/users/entities/user.entity';
