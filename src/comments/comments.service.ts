@@ -52,6 +52,7 @@ export class CommentsService {
         user: { pseudo: true },
       },
       where: { deleted_at: IsNull() },
+      order: { id: 'DESC' },
     });
   }
   //Récupération de l'id user via token à add
