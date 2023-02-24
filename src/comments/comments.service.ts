@@ -78,7 +78,7 @@ export class CommentsService {
     id: number,
     updateCommentDto: UpdateCommentDto,
   ): Promise<Comment | null> {
-    console.log('Récupération de lid user via token à add');
+    console.log(id);
     const newComment = await Comment.findOne({
       where: { id: id, deleted_at: IsNull() },
     });
@@ -88,14 +88,16 @@ export class CommentsService {
       await newComment.save();
 
       return await Comment.findOne({
-        relations: { article: true },
+        relations: { article: true, user: true },
         select: {
           id: true,
           content: true,
-          article: { id: true, title: true },
+          created_at: true,
           updated_at: true,
+          article: { id: true, title: true },
+          user: { pseudo: true },
         },
-        where: { id: id },
+        where: { id: id, deleted_at: IsNull() },
       });
     }
     return null;
