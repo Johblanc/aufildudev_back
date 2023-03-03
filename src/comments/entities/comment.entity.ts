@@ -26,7 +26,7 @@ export class Comment extends BaseEntity {
   created_at: Date;
 
   @ApiProperty()
-  @Column({ type: 'timestamptz', default: null })
+  @UpdateDateColumn({ type: 'timestamptz', default: null })
   updated_at: Date;
 
   @ApiProperty()
