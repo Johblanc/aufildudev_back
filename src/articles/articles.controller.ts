@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, UseGuards, Request, ForbiddenException, ClassSerializerInterceptor, UseInterceptors, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ConflictException, NotFoundException, BadRequestException, UseGuards, Request, ForbiddenException, ClassSerializerInterceptor, UseInterceptors, Bind, ParseIntPipe, } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetAuthor } from 'src/auth/get-author.decorator';
 import { GetModerator } from 'src/auth/get-moderator.decorator';
@@ -188,6 +188,7 @@ export class ArticlesController {
    */
   @UseGuards(JwtAuthGuard)
   @Get(':id')
+  @Bind(Param('id', new ParseIntPipe()))
   async findOne(@Param('id') id: string, @GetUser() user : User) 
   {
     /** Récupération de l'**Article** */
@@ -230,6 +231,7 @@ export class ArticlesController {
    * @returns l'**Article** recherché
    */
   @Get('public/:id')
+  @Bind(Param('id', new ParseIntPipe()))
   async findOnePublic(@Param('id') id: string) 
   {
     const article = await this.articlesService.findOnePublicById(+id)
@@ -255,6 +257,7 @@ export class ArticlesController {
    */
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
+  @Bind(Param('id', new ParseIntPipe()))
   async update(@Param('id') id: string, @Body() updateArticleDto: UpdateArticleDto, @GetUser() user : User) 
   {
     /** Déconstruction de la Dto */
@@ -351,6 +354,7 @@ export class ArticlesController {
    */
   @UseGuards(JwtAuthGuard)
   @Patch('submit/:id')
+  @Bind(Param('id', new ParseIntPipe()))
   async submit(@Param('id') id: string, @GetUser() user : User) 
   {
     /** L'**Article** à soumettre */
@@ -394,6 +398,7 @@ export class ArticlesController {
    */
   @UseGuards(JwtAuthGuard)
   @Patch('validate/:id')
+  @Bind(Param('id', new ParseIntPipe()))
   async validate(@Param('id') id: string, @GetModerator() _ : User) 
   {
     /** L'**Article** à soumettre */
@@ -432,6 +437,7 @@ export class ArticlesController {
    * @returns l'**Article** supprimé
    */
   @Delete(':id')
+  @Bind(Param('id', new ParseIntPipe()))
   async remove(@Param('id') id: string, @GetUser() user : User) 
   {
     /** L'**Article** à modifier */

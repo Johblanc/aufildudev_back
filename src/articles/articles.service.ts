@@ -34,6 +34,7 @@ export class ArticlesService {
       languages : true,
       categories : true,
       frameworks : true,
+      comments : { user : true } ,
       needed_for : { article : true },
       requirements : { article_needed : true }
     }

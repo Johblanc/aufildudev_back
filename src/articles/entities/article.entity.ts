@@ -41,8 +41,8 @@ export class Article extends BaseEntity {
     @Column({ type: 'timestamptz', default: null, nullable: true })
     deleted_at: Date;
 
-    @ManyToOne(() => Comment, (comment) => comment.article)
-    comments: Comment;
+    @OneToMany(() => Comment, (comment) => comment.article)
+    comments: Comment[];
 
     @ManyToOne(() => User, (user) => user.articles)
     user: User;
@@ -66,10 +66,11 @@ export class Article extends BaseEntity {
     frameworks: Framework[];
 
     asObject(){
+        
         return {
             id : this.id,
             title : this.title,
-            content : this.comments,
+            content : this.content,
             status : this.status,
             user_pseudo : this.user.pseudo,
             created_at : this.created_at,
@@ -77,7 +78,15 @@ export class Article extends BaseEntity {
             needed_for : this.needed_for.map(item => item.asNeeded_for()),
             languages : this.languages,
             categories : this.categories,
-            frameworks : this.frameworks
+            frameworks : this.frameworks,
+            comments : this.comments.map(item => {
+                return {
+                    id : item.id ,
+                    content : item.content ,
+                    created_at : item.created_at ,
+                    user_pseudo : item.user.pseudo
+                }
+            })
         }
     }
 }
