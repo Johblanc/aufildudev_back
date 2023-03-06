@@ -22,6 +22,5 @@ export class Category extends BaseEntity {
   name: string;
 
   @ManyToMany(() => Article, (article) => article.categories)
-  @JoinTable()
   articles: Article[];
 }

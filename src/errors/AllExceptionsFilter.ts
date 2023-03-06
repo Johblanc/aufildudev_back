@@ -12,7 +12,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const exept : string | {statusCode?: number, message?:string,error?:string} = exception.getResponse();
     if (typeof exept === "object")
     {
-      console.log(exept);
       
       console.log( `${request.method} | ${status} | ${request.url}\n${exept.error}`)
       response

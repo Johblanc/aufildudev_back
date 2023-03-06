@@ -41,7 +41,10 @@ export class FrameworksController {
         data: data
       }
     }
-    throw new NotFoundException('aucun Framework disponible')
+    return {
+      message: "pas de frameworks disponibles",
+      data: data
+    }
   }
 
 

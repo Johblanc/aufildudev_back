@@ -8,6 +8,8 @@ import {
   Delete,
   NotFoundException,
   Bind,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ParseIntPipe } from '@nestjs/common/pipes';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -15,6 +17,9 @@ import { ArticlesService } from 'src/articles/articles.service';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth-guards';
+import { GetUser } from 'src/auth/get-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @ApiTags('comments')
 @Controller('comments')
@@ -28,13 +33,16 @@ export class CommentsController {
    * @param createCommentDto Reçois le Body en param via le dto
    * @return en data son id, son contenu ainsi que l'id et le titre de l'article associé
    */
-  //Récupération de l'id user via token à add
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 201, description: 'Commentaire posté' })
   @Post()
-  async create(@Body() createCommentDto: CreateCommentDto) {
+  async create(
+    @Body() createCommentDto: CreateCommentDto,
+    @GetUser() user: User,
+  ) {
     return {
       message: `Commentaire posté`,
-      data: await this.commentsService.create(createCommentDto),
+      data: await this.commentsService.create(createCommentDto, user),
     };
   }
 
@@ -87,7 +95,7 @@ export class CommentsController {
   @Get('article/:id')
   @Bind(Param('id', new ParseIntPipe()))
   async find(@Param('id') id: string) {
-    const isExist = await this.articlesService.findOne(+id);
+    const isExist = await this.articlesService.findOneById(+id);
     if (!isExist) throw new NotFoundException();
     return {
       message: `Voici tout les commentaire de l'article ${id}.`,

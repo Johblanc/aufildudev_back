@@ -22,7 +22,6 @@ export class Framework extends BaseEntity {
   name: string;
 
   @ManyToMany(() => Article, (article) => article.frameworks)
-  @JoinTable()
   articles: Article[];
 }
   

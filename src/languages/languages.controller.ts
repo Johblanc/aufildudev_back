@@ -42,7 +42,10 @@ export class LanguagesController {
         data: data
       }
     }
-    throw new NotFoundException('aucun language disponible')
+    return {
+      message: "pas de frameworks disponibles",
+      data: data
+    }
   }
 
 
@@ -91,7 +94,7 @@ export class LanguagesController {
 
     return {
       message: "Le language à bien été supprimé",
-      data:remove
+      data: remove
     }
   }
 
