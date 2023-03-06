@@ -1,19 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Article } from 'src/articles/entities/article.entity';
 import { Comment } from 'src/comments/entities/comment.entity';
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  Unique,
-  OneToMany,
-} from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 @Entity('users')
 @Unique(['pseudo', 'email'])
 export class User extends BaseEntity {
+
   @ApiProperty()
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;

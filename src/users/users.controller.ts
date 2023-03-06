@@ -8,7 +8,9 @@ import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guards';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { UnauthorizedException } from '@nestjs/common/exceptions';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(
