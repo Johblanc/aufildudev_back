@@ -19,4 +19,4 @@ controllers : [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy, UsersService],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule {} /* Pour le app.module.ts */

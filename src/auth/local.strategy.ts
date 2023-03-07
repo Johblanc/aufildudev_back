@@ -18,7 +18,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const isUserExist = await this.usersService.findOneByPseudo(pseudo)
     
     if (!isUserExist) throw new BadRequestException("Pseudo incorrect.")
-    const user = await this.authService.validateUser(pseudo, password);
+    const user = await this.authService.validateUser(pseudo, password);  /* Grâce à l'auth.service.ts */
     if (!user) {
       throw new UnauthorizedException();
     }

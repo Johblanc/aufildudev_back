@@ -1,5 +1,3 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateUserDto } from './create-user.dto';
 import { IsNotEmpty, IsString, IsNumber } from "class-validator";
 import { ApiProperty } from '@nestjs/swagger';
 
