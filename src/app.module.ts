@@ -17,6 +17,7 @@ import { Framework } from './frameworks/entities/framework.entity';
 import { Comment } from './comments/entities/comment.entity';
 import { Requierment } from './requierments/entities/requierment.entity';
 import { AuthModule } from './auth/auth.module';
+import { TchatGateway } from './tchat/tchat.gateway';
 
 @Module({
   imports: [
@@ -48,6 +49,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TchatGateway],
 })
 export class AppModule {}
