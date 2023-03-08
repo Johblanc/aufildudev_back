@@ -31,6 +31,7 @@ export class CommentsService {
         select: {
           id: true,
           content: true,
+          created_at: true,
           article: { id: true, title: true },
           user: { id: true, pseudo: true },
         },
