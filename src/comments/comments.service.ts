@@ -60,16 +60,48 @@ export class CommentsService {
     console.log('Récupération de lid user via token à add');
     return await Comment.findOne({
       relations: { article: true },
-      select: { id: true, content: true, article: { id: true, title: true } },
+      select: {
+        id: true,
+        content: true,
+        created_at: true,
+        updated_at: true,
+        article: { id: true, title: true },
+        user: { pseudo: true },
+      },
       where: { id: id, deleted_at: IsNull() },
     });
   }
 
+  async findByUserId(id: number): Promise<Comment[] | null> {
+    const comms = await Comment.find({
+      relations: { user: true, article: true },
+      select: {
+        id: true,
+        content: true,
+        created_at: true,
+        updated_at: true,
+        article: { id: true, title: true },
+        user: { pseudo: true },
+      },
+      where: { user: { id: id }, deleted_at: IsNull() },
+      order: { created_at: 'DESC' },
+    });
+    return comms;
+  }
+
   async getArticleById(id: number): Promise<Comment[] | null> {
     return await Comment.find({
-      relations: { article: true },
-      select: { id: true, content: true, article: { id: true, title: true } },
-      where: { article: { id: id, deleted_at: IsNull() } },
+      relations: { article: true, user: true },
+      select: {
+        id: true,
+        content: true,
+        article: { id: true, title: true },
+        user: { pseudo: true },
+      },
+      where: {
+        article: { id: id, deleted_at: IsNull() },
+        deleted_at: IsNull(),
+      },
       order: { created_at: 'DESC' },
     });
   }

@@ -62,6 +62,21 @@ export class CommentsController {
     };
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Voici les commentaires de ${user.pseudo}',
+  })
+  @Get('user/:id')
+  @Bind(Param('id', new ParseIntPipe()))
+  async findBy(@Param('id') id: string) {
+    const comment = await this.commentsService.findByUserId(+id);
+    if (comment === null) throw new NotFoundException();
+    return {
+      message: `Voici les commentairesde l'user n°${id}`,
+      data: comment,
+    };
+  }
+
   /** Récupération d'un commentaire
    *
    * @param createCommentDto Reçois le Body en param via le dto
