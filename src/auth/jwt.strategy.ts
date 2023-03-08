@@ -5,7 +5,7 @@ import { UsersService } from 'src/users/users.service';
 import { NotFoundException } from '@nestjs/common/exceptions';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy) {      /* export pour l'aut.module.ts */
   constructor( 
     private readonly usersService: UsersService
     ) {
@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  // Retoune le User
+  // Retourne le User
   async validate(payload: any) {
     const user = await this.usersService.findOneById(payload.sub)
     if (user === null) {

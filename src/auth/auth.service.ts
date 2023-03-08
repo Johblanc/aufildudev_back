@@ -10,6 +10,11 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
+
+
+
+  /** Pour SE LOGIN, avec le auth.controller.ts et le local.strategy.ts */
+
   async validateUser(pseudo: string, pass: string): Promise<any> {
     const user = await this.usersService.findOneByPseudo(pseudo);
 
