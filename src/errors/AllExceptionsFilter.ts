@@ -9,9 +9,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    const exept = exception.getResponse();
+    const exept : string | {statusCode?: number, message?:string,error?:string} = exception.getResponse();
     if (typeof exept === "object")
     {
+      
+      console.log( `${request.method} | ${status} | ${request.url}\n${exept.error}`)
       response
         .status(status)
         .json({
@@ -22,6 +24,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
     else
     {
+      console.log( `${request.method} | ${status} | ${request.url}\n${exept}`)
       response
         .status(status)
         .json({

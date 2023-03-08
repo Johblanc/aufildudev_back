@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete} from '@nestjs/common';
-import { BadRequestException, ConflictException } from '@nestjs/common/exceptions';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common/exceptions';
 import { LanguagesService } from './languages.service';
 import { CreateLanguageDto } from './dto/create-language.dto';
 import { UpdateLanguageDto } from './dto/update-language.dto';
@@ -16,51 +16,86 @@ export class LanguagesController {
 
   @Post()
   async create(@Body() createLanguageDto: CreateLanguageDto) {
-    const verificationName = await Language.findOneBy({
-      name: In([])
-    });
+    const verificationName = await this.languagesService.findOneLanguageName(createLanguageDto.name)
+
     if (verificationName) {
-      throw new ConflictException('Language deja existant')
+      throw new ConflictException('Language déja existant')
     };
 
     const newLanguage = await this.languagesService.createLanguage(
       createLanguageDto
     );
-
-    if (newLanguage===null){
-    console.log(createLanguageDto);
-        throw new BadRequestException("Nom du langugage manquant");
+    return {
+      message: 'nouveau language ajouté',
+      data: newLanguage
     }
-      
-    else {
+  }
+
+
+  @Get()
+  async findAll() {
+    const data = await this.languagesService.findAllLanguages();
+
+    if (data.length != 0) {
       return {
-        message: 'nouveau language ajoute',
-        data: newLanguage
+        message: 'liste des languages disponible',
+        data: data
       }
     }
+    return {
+      message: "pas de frameworks disponibles",
+      data: data
+    }
   }
 
 
-
-
-  /* @Get()
-  findAll() {
-    return this.languagesService.findAll();
-  }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.languagesService.findOne(+id);
+  async findOne(@Param('id') id: number) {
+    const data = await this.languagesService.findOneLanguage(+id)
+
+    if (!data) {
+      throw new NotFoundException("l'ID ne correspond à aucun language")
+    };
+    return {
+      message: "language:",
+      data: data
+    }
   }
+
+
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLanguageDto: UpdateLanguageDto) {
-    //verifier que le NOUVEAU name nexiste pas deja
-    return this.languagesService.update(+id, updateLanguageDto);
+  async updateLanguage(
+    @Param('id') id: number,
+    @Body() updateLanguageDto: UpdateLanguageDto
+  ) {
+    const data = await this.languagesService.findOneLanguage(+id);
+
+    if (!data) {
+      throw new NotFoundException("l'ID' ne correspond à aucun Language")
+    }
+    const result = await this.languagesService.updateLanguage(data.id, updateLanguageDto);
+    return {
+      message: "Language modifié",
+      data: result
+    }
   }
 
+
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.languagesService.remove(+id);
-  } */
+  async remove(@Param('id') id: number) {
+    const data = await this.languagesService.findOneLanguage(+id)
+
+    if (!data) {
+      throw new NotFoundException("l'ID' ne correspond à aucun Language")
+    }
+    const remove = await this.languagesService.removeLanguage(id)
+
+    return {
+      message: "Le language à bien été supprimé",
+      data: remove
+    }
+  }
+
 }

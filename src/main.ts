@@ -12,12 +12,12 @@ async function bootstrap() {
   app.setGlobalPrefix('api/');
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();
-
   const config = new DocumentBuilder()
     .setTitle('Au Fil du Dev')
     .setDescription('API description')
     .setVersion('1.0')
     .addTag('dev')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
@@ -25,6 +25,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ResponserInterceptor());
 
-  await app.listen(3000);
+  await app.listen(8000);
 }
 bootstrap();

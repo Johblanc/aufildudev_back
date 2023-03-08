@@ -1,26 +1,65 @@
 import { Injectable } from '@nestjs/common';
+import { In } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Category } from './entities/category.entity';
+
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  async createCategorie(createCategoryDto: CreateCategoryDto) {
+    const newCategorie = Category.create({
+      name: createCategoryDto.name
+    });
+    const data = await Category.save(newCategorie);
+    return data
+  };
+
+
+
+  async findAllCategories() {
+    const data = await Category.find();
+    return data
   }
 
-  findAll() {
-    return `This action returns all categories`;
+
+
+  async findOneCategorie(categorieId: number) {
+    const data = await Category.findOneBy({ id: categorieId });
+    return data
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+
+  async findOneCategorieName(name: string) {
+    return await Category.findOneBy({ name: name });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+
+  async findManyCategories(categorieId: number[]) {
+    const data = await Category.findBy({
+      id: In(categorieId)
+    })
+    return data
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+
+  async updateCategorie(categorieId: number, updateCategoryDto: UpdateCategoryDto): Promise<Category | null> {
+    const data = await Category.findOneBy({ id: categorieId });
+    if (data !== null) {
+      if (updateCategoryDto.name)
+        data.name = updateCategoryDto.name;
+      await data.save()
+    }
+    return data
+  }
+
+
+  async removeCategorie(categorieId: number): Promise<Category| null> {
+    const data = await Category.findOneBy({ id: categorieId });
+    if (data !== null) {
+      await data.remove()
+
+    }
+    return data;
   }
 }

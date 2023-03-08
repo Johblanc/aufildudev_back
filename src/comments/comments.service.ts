@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Article } from 'src/articles/entities/article.entity';
+import { User } from 'src/users/entities/user.entity';
 import { IsNull } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -8,9 +9,10 @@ import { Comment } from './entities/comment.entity';
 @Injectable()
 export class CommentsService {
   //Récupération de l'id user via token à add
-  async create(createCommentDto: CreateCommentDto): Promise<Comment | null> {
-    console.log('Récupération de lid user via token à add');
-
+  async create(
+    createCommentDto: CreateCommentDto,
+    user: User,
+  ): Promise<Comment | null> {
     const article = await Article.findOneBy({
       id: createCommentDto.article_id,
       deleted_at: IsNull(),
@@ -20,14 +22,18 @@ export class CommentsService {
       const comment = new Comment();
       comment.content = createCommentDto.content;
       comment.article = article;
+      comment.user = user;
+
       await comment.save();
 
       return await Comment.findOne({
-        relations: { article: true },
+        relations: { article: true, user: true },
         select: {
           id: true,
           content: true,
+          created_at: true,
           article: { id: true, title: true },
+          user: { id: true, pseudo: true },
         },
         where: { id: comment.id },
       });
@@ -37,9 +43,17 @@ export class CommentsService {
 
   async findAll(): Promise<Comment[] | null> {
     return await Comment.find({
-      relations: { article: true },
-      select: { id: true, content: true, article: { id: true, title: true } },
+      relations: { article: true, user: true },
+      select: {
+        id: true,
+        content: true,
+        created_at: true,
+        updated_at: true,
+        article: { id: true, title: true },
+        user: { pseudo: true },
+      },
       where: { deleted_at: IsNull() },
+      order: { id: 'DESC' },
     });
   }
   //Récupération de l'id user via token à add
@@ -47,16 +61,50 @@ export class CommentsService {
     console.log('Récupération de lid user via token à add');
     return await Comment.findOne({
       relations: { article: true },
-      select: { id: true, content: true, article: { id: true, title: true } },
+      select: {
+        id: true,
+        content: true,
+        created_at: true,
+        updated_at: true,
+        article: { id: true, title: true },
+        user: { pseudo: true },
+      },
       where: { id: id, deleted_at: IsNull() },
     });
   }
 
+  async findByUserId(id: number): Promise<Comment[] | null> {
+    const comms = await Comment.find({
+      relations: { user: true, article: true },
+      select: {
+        id: true,
+        content: true,
+        created_at: true,
+        updated_at: true,
+        article: { id: true, title: true },
+        user: { pseudo: true },
+      },
+      where: { user: { id: id }, deleted_at: IsNull() },
+      order: { created_at: 'DESC' },
+    });
+    return comms;
+  }
+
   async getArticleById(id: number): Promise<Comment[] | null> {
     return await Comment.find({
-      relations: { article: true },
-      select: { id: true, content: true, article: { id: true, title: true } },
-      where: { article: { id: id, deleted_at: IsNull() } },
+      relations: { article: true, user: true },
+      select: {
+        id: true,
+        content: true,
+        created_at: true,
+        updated_at: true,
+        article: { id: true, title: true },
+        user: { pseudo: true },
+      },
+      where: {
+        article: { id: id, deleted_at: IsNull() },
+        deleted_at: IsNull(),
+      },
       order: { created_at: 'DESC' },
     });
   }
@@ -65,7 +113,7 @@ export class CommentsService {
     id: number,
     updateCommentDto: UpdateCommentDto,
   ): Promise<Comment | null> {
-    console.log('Récupération de lid user via token à add');
+    console.log(id);
     const newComment = await Comment.findOne({
       where: { id: id, deleted_at: IsNull() },
     });
@@ -75,14 +123,16 @@ export class CommentsService {
       await newComment.save();
 
       return await Comment.findOne({
-        relations: { article: true },
+        relations: { article: true, user: true },
         select: {
           id: true,
           content: true,
-          article: { id: true, title: true },
+          created_at: true,
           updated_at: true,
+          article: { id: true, title: true },
+          user: { pseudo: true },
         },
-        where: { id: id },
+        where: { id: id, deleted_at: IsNull() },
       });
     }
     return null;
