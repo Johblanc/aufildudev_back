@@ -18,6 +18,7 @@ import { Comment } from './comments/entities/comment.entity';
 import { Requierment } from './requierments/entities/requierment.entity';
 import { AuthModule } from './auth/auth.module';
 import { TchatGateway } from './tchat/tchat.gateway';
+import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
@@ -49,6 +50,6 @@ import { TchatGateway } from './tchat/tchat.gateway';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TchatGateway],
+  providers: [AppService, TchatGateway, UsersService],
 })
 export class AppModule {}
