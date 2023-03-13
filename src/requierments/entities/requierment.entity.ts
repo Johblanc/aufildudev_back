@@ -25,12 +25,14 @@ export class Requierment extends BaseEntity {
     return {
       id : this.article_needed.id ,
       title : this.article_needed.title ,
+      status : this.article_needed.status
     }
   }
   asNeeded_for(){
     return {
       id : this.article.id ,
       title : this.article.title ,
+      status : this.article.status
     }
   }
 }

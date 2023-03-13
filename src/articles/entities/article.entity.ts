@@ -9,6 +9,7 @@ import { ApiProperty, ApiTags } from '@nestjs/swagger';
 import { Comment } from 'src/comments/entities/comment.entity';
 import { Requierment } from 'src/requierments/entities/requierment.entity';
 import { User } from 'src/users/entities/user.entity';
+import { ArticleStatus } from "../emun/articles-status.emun";
 
 @Entity('articles')
 @Unique(['title'])
@@ -74,8 +75,8 @@ export class Article extends BaseEntity {
             status : this.status,
             user_pseudo : this.user.pseudo,
             created_at : this.created_at,
-            requirements : this.requirements.map(item => item.asRequirement()),
-            needed_for : this.needed_for.map(item => item.asNeeded_for()),
+            requirements : this.requirements.map(item => item.asRequirement()).filter(item => item.status === ArticleStatus.Public),
+            needed_for : this.needed_for.map(item => item.asNeeded_for()).filter(item => item.status === ArticleStatus.Public),
             languages : this.languages,
             categories : this.categories,
             frameworks : this.frameworks,

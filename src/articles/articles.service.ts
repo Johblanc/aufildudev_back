@@ -120,7 +120,7 @@ export class ArticlesService {
     });
   }
 
-  /** *async* Recherche par id d' **Articles** dans la base de donnée
+  /** *async* Recherche par id d' **Articles publiques** dans la base de donnée
    * 
    * @param ids   des **Articles** à trouver
    * @returns     la liste des **Articles**
