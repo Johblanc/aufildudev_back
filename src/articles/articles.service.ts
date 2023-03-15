@@ -188,11 +188,14 @@ export class ArticlesService {
       languages? : Language[] ,
       categories? : Category[] ,
       frameworks? : Framework[] ,
-    }
+    },
   )  : Promise<Article | null>
   {
     /** L'**Article** à modifier */
     const article = await this.findOneById(id)
+
+    
+    console.log(article);
     
     if ( article !== null ){
       // Eventuelle modification pour tous les parametres sauf requirements
@@ -201,7 +204,9 @@ export class ArticlesService {
       if (data.languages) article.languages = data.languages ;
       if (data.categories) article.categories = data.categories ;
       if (data.frameworks) article.frameworks = data.frameworks ;
+      if (article.user.access_lvl === 1 && article.status === "public") article.status = "submit"
       
+      console.log(article);
       // Enregistrement des modifications
       await article.save({}) ;
 

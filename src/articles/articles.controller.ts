@@ -153,7 +153,6 @@ export class ArticlesController {
    * @returns   La liste des **Articles** du **User**
    */
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth("user")
   @Get("user")
   async findAllMine(@GetUser() user : User) 
   {
@@ -187,7 +186,7 @@ export class ArticlesController {
    * @returns     l'**Article** recherché
    */
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
+  @Get('user/:id')
   @Bind(Param('id', new ParseIntPipe()))
   async findOne(@Param('id') id: string, @GetUser() user : User) 
   {
@@ -262,6 +261,7 @@ export class ArticlesController {
   {
     /** Déconstruction de la Dto */
     const { requirements, languages, categories, frameworks,...base} = updateArticleDto ;
+    
 
     /** L'**Article** à modifier */
     const article = await this.articlesService.findOneById(+id)
@@ -272,26 +272,22 @@ export class ArticlesController {
       throw new NotFoundException("Cette article n'existe pas")
     }
 
+    if (base.title){
+      const isNameExist = await this.articlesService.findOneByTitle(base.title)
+      if (isNameExist && isNameExist.title !== article.title){
+        throw new ConflictException("Ce titre est déjà pris")
+      }
+    }
+
     // Vérification de la propriété pour un Article privé
-    if 
+    if   
     ( 
-      article.status === ArticleStatus.Private &&
       article.user.id !== user.id
     )
     {
       throw new ForbiddenException("Vous n'etes pas le propriétaire de cette article")
     }
     
-    // Vérification du niveau d'accés pour les autres Articles
-    if 
-    ( 
-      article.status !== ArticleStatus.Private &&
-      article.user.id !== user.id &&
-      user.access_lvl < 3
-    )
-    {
-      throw new ForbiddenException("Vous n'avez pas accés à cette article")
-    }
 
     /** Récupération des **Langages** liés à l'**Article** */
     let languagesList : Language[] = []
