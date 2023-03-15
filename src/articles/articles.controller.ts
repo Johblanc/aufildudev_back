@@ -395,7 +395,7 @@ export class ArticlesController {
   @UseGuards(JwtAuthGuard)
   @Patch('validate/:id')
   @Bind(Param('id', new ParseIntPipe()))
-  async validate(@Param('id') id: string, @GetModerator() _ : User) 
+  async validate(@Param('id') id: string, @GetAuthor() user : User) 
   {
     /** L'**Article** à soumettre */
     const article = await this.articlesService.findOneById(+id)
@@ -412,7 +412,7 @@ export class ArticlesController {
       throw new ForbiddenException("L'article est déjà publique")
     }
 
-    if ( article.status === ArticleStatus.Private )
+    if ( article.status === ArticleStatus.Private && article.user.id !== user.id )
     {
       throw new ForbiddenException("L'article n'est pas soumis pour validation")
     }
@@ -432,10 +432,12 @@ export class ArticlesController {
    * @param user  le **User** effectuant la requete
    * @returns l'**Article** supprimé
    */
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @Bind(Param('id', new ParseIntPipe()))
   async remove(@Param('id') id: string, @GetUser() user : User) 
   {
+    
     /** L'**Article** à modifier */
     const article = await this.articlesService.findOneById(+id)
 
@@ -445,26 +447,16 @@ export class ArticlesController {
       throw new NotFoundException("Cette article n'existe pas")
     }
 
+    console.log(id,article.user.id,user);
     // Vérification de la propriété pour un Article privé
     if 
     ( 
-      article.status === ArticleStatus.Private &&
-      article.user.id !== user.id
+      article.user.id !== user.id && user.access_lvl < 3
     )
     {
       throw new ForbiddenException("Vous n'etes pas le propriétaire de cette article")
     }
     
-    // Vérification du niveau d'accés pour les autres Articles
-    if 
-    ( 
-      article.status !== ArticleStatus.Private &&
-      article.user.id !== user.id &&
-      user.access_lvl < 3
-    )
-    {
-      throw new ForbiddenException("Vous n'avez pas accés à cette article")
-    }
 
     return  {
       message : "Suppression d'un article",
