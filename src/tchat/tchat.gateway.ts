@@ -16,7 +16,6 @@ export class TchatGateway {
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() message: string): Promise<void> {
     const data = JSON.parse(message);
-    console.log(message);
     const user = await this.usersService.findOneById(data.id);
 
     if (user) {
