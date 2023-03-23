@@ -274,8 +274,16 @@ export class ArticlesService {
    */
   async remove(id: number) : Promise<Article | null>
   {
+    
     const article = await this.findOneById(id)
-    if (article !== null)  await article.remove() ;
+    if (article !== null)  
+    {
+      Promise.all([
+        ...article.requirements.map(async item => await item.remove()),
+        ...article.needed_for.map(async item => await item.remove())
+      ])
+      await article.remove() ;
+    };
     return article
   }
 }

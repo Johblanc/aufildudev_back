@@ -81,11 +81,11 @@ export class UsersController {
     /* Exemple d'une nouvelle méthode plus rapide pour cette requête avec @GetUser() user : User */
     if (user !== null) {
       /* Vérification de l'existance */
-      if (updateUserDto.password)
+      /* if (updateUserDto.password)
         updateUserDto.password = await bcrypt.hash(
           updateUserDto.password,
           10,
-        ); /* Crypte le nouveau mot de passe s'il est changé dans le front (via Dto) */
+        ); */ /* Crypte le nouveau mot de passe s'il est changé dans le front (via Dto) */
 
       const updateUser = await this.usersService.updateUser(
         user.id,
