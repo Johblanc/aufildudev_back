@@ -20,6 +20,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth-guards';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { UnauthorizedException } from '@nestjs/common/exceptions';
 
 @ApiTags('comments')
 @Controller('comments')
@@ -127,6 +128,7 @@ export class CommentsController {
     status: 201,
     description: 'Vous avez modifié le commentaire n°${id}',
   })
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @Bind(Param('id', new ParseIntPipe()))
   async update(
@@ -150,11 +152,17 @@ export class CommentsController {
    */
   @ApiResponse({
     status: 201,
-    description: 'Commentaire n°${id} supprimé',
+    description: 'Commentaire supprimé',
   })
+  @UseGuards(JwtAuthGuard)
   @Bind(Param('id', new ParseIntPipe()))
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @GetUser() user: User) {
+    const isYourComment = await this.commentsService.findOne(+id);
+
+    if (user.pseudo !== isYourComment?.user.pseudo || user.access_lvl < 3)
+      throw new UnauthorizedException('Ce commentaire ne vous appartient pas');
+
     const commentDeleted = await this.commentsService.remove(+id);
     if (commentDeleted === null) throw new NotFoundException();
     return {
