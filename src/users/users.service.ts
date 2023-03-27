@@ -53,23 +53,26 @@ export class UsersService {
 
   /** Pour que l'administrateur TROUVE tous les utilisateurs */
   async findAllUsers() {
-    const data = await User.find();
+    const data = await User.find({ order: { pseudo: 'ASC' } });
     return data;
   }
 
   /** Pour que l'administrateur PROMEUVE un utilisateur*/
 
-  async promoteUser(promoteAdminDto: PromoAdminDto): Promise<User | null> {
-    const user = await this.findOneByPseudo(
-      promoteAdminDto.pseudo,
-    ); /* Trouve l'utilisateur par son pseudo */
+  async promoteUser(
+    promoteAdminDto: PromoAdminDto,
+    id: number,
+  ): Promise<User | null> {
+    /* Change le niveau d'accès de l'utilisateur */
+    const updatedUser = await User.findOneBy({ id: id });
 
-    if (user !== null) {
-      user.access_lvl =
-        promoteAdminDto.access_lvl; /* Change le niveau d'accès de l'utilisateur */
+    if (updatedUser !== null) {
+      updatedUser.access_lvl = promoteAdminDto.access_lvl;
 
-      return await user.save(); /* Sauvegarde la modification */
+      /* Sauvegarde la modification */
+      return await updatedUser.save();
     }
+
     return null;
   }
 }

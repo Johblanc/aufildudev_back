@@ -9,6 +9,9 @@ import {
   UseGuards,
   NotFoundException,
   Get,
+  Bind,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -116,37 +119,29 @@ export class UsersController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtAuthGuard)
-  @Patch('promote')
+  @Patch('promote/:id')
+  @Bind(Param('id', new ParseIntPipe()))
   async promoAdmin(
+    @Param('id') id: string,
     @Body() promoteAdminDto: PromoAdminDto,
     @Request() req: any,
   ) {
     /* @Request = ancienne méthode à remplacer par @Get */
-    const adminId = req.user.id;
-    const admin = await this.usersService.findOneById(
-      adminId,
-    ); /* Vérifie que l'administrateur existe par son id grâce à UsersService */
-    if (admin === null) {
-      throw new NotFoundException("Vous n'êtes pas enregistré dans la base.");
-    }
+    const userData = req.user;
+    if (userData.access_lvl < 4)
+      throw new UnauthorizedException('Accès non autorisé.');
 
-    if (admin.access_lvl < 4) {
-      /* Vérifie le niveau requis pour l'administrateur */
-      throw new UnauthorizedException(
-        "Vous n'avez pas le niveau d'accès requis.",
-      );
-    }
-
-    const user = await this.usersService.promoteUser(
+    const updateUser = await this.usersService.promoteUser(
       promoteAdminDto,
+      +id,
     ); /* Promeut un utilisateur grâce à UsersService */
-    if (user === null) {
-      throw new NotFoundException("Cet utilisateur n'existe pas.");
-    }
+
+    if (updateUser === null)
+      throw new NotFoundException("Le user demandé n'existe pas");
 
     return {
-      message: `${user.pseudo} est passé au niveau d'acces ${user.access_lvl}`,
-      data: user,
+      message: `${updateUser.pseudo} est passé au niveau d'acces ${updateUser.access_lvl}`,
+      data: updateUser,
     };
   }
 }
