@@ -1,4 +1,5 @@
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -8,6 +9,9 @@ import { ResponserInterceptor } from './interceptors/responser.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  ConfigModule.forRoot();
+  const port = process.env.PORT || 3000;
 
   app.setGlobalPrefix('api/');
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -25,6 +29,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new ResponserInterceptor());
 
-  await app.listen(8000);
+  await app.listen(port);
+  console.log('Server started at http://localhost:'+ port);
 }
 bootstrap();
