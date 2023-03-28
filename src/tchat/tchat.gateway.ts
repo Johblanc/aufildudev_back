@@ -14,6 +14,7 @@ export class TchatGateway {
   @WebSocketServer()
   server: Server;
 
+  //Recepteur des messages du front
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() message: string) {
     const data = JSON.parse(message);
@@ -21,6 +22,7 @@ export class TchatGateway {
 
     if (user) {
       if (data.pseudo === user.pseudo) {
+        //Emission des messages reçu aux fronts connectés
         return this.server.emit('message', message);
       }
     }
