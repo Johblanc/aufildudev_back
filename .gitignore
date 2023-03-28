@@ -36,6 +36,7 @@ lerna-debug.log*
 
 # Environnement
 .env
+.env2
 
 #StandBy
 src/auth/roles
