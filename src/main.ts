@@ -6,16 +6,9 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './errors/AllExceptionsFilter';
 import { ResponserInterceptor } from './interceptors/responser.interceptor';
-import * as fs from 'fs';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
-  const httpsOptions = {
-    key: fs.readFileSync('path/to/ssl/key'),
-    cert: fs.readFileSync('path/to/ssl/cert'),
-  };
-  const app = await NestFactory.create(AppModule, { httpsOptions });
-  app.useWebSocketAdapter(new IoAdapter(app));
+  const app = await NestFactory.create(AppModule);
 
   ConfigModule.forRoot();
   const port = process.env.PORT || 8000;

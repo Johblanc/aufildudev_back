@@ -1,9 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import {
   MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -12,24 +9,10 @@ import { Server } from 'https';
 import { UsersService } from 'src/users/users.service';
 
 @WebSocketGateway({ cors: '*' })
-export class TchatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+export class TchatGateway {
   constructor(private readonly usersService: UsersService) {}
   @WebSocketServer()
   server: Server;
-
-  afterInit(server: Server) {
-    console.log('Socket.IO server initialized');
-  }
-
-  handleConnection(client: any, ...args: any[]) {
-    console.log('Client connected: ' + client.id);
-  }
-
-  handleDisconnect(client: any) {
-    console.log('Client disconnected: ' + client.id);
-  }
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() message: string) {
