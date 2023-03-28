@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   ConfigModule.forRoot();
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 8000;
 
   app.setGlobalPrefix('api/');
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -30,6 +30,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponserInterceptor());
 
   await app.listen(port);
-  console.log('Server started at http://localhost:'+ port);
+  console.log('Server started at http://localhost:' + port);
 }
 bootstrap();

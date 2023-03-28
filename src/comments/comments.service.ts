@@ -56,11 +56,9 @@ export class CommentsService {
       order: { id: 'DESC' },
     });
   }
-  //Récupération de l'id user via token à add
   async findOne(id: number): Promise<Comment | null> {
-    console.log('Récupération de lid user via token à add');
-    return await Comment.findOne({
-      relations: { article: true },
+    const comment = await Comment.findOne({
+      relations: { article: true, user: true },
       select: {
         id: true,
         content: true,
@@ -71,6 +69,9 @@ export class CommentsService {
       },
       where: { id: id, deleted_at: IsNull() },
     });
+    if (comment !== null) return comment;
+
+    return null;
   }
 
   async findByUserId(id: number): Promise<Comment[] | null> {
@@ -139,7 +140,6 @@ export class CommentsService {
   }
   //Récupération de l'id user via token à add
   async remove(id: number): Promise<Comment | null> {
-    console.log('Récupération de lid user via token à add');
     const deleteComment = await Comment.findOne({
       where: { id: id, deleted_at: IsNull() },
     });

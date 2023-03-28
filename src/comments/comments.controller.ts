@@ -160,7 +160,10 @@ export class CommentsController {
   async remove(@Param('id') id: string, @GetUser() user: User) {
     const isYourComment = await this.commentsService.findOne(+id);
 
-    if (user.pseudo !== isYourComment?.user.pseudo || user.access_lvl < 3)
+    if (isYourComment === null)
+      throw new NotFoundException("Ce commentaire n'existe pas");
+
+    if (user.pseudo !== isYourComment?.user.pseudo && user.access_lvl < 3)
       throw new UnauthorizedException('Ce commentaire ne vous appartient pas');
 
     const commentDeleted = await this.commentsService.remove(+id);
